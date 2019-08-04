@@ -38,16 +38,36 @@ int main()
 
 		
 
+		//char ch = 0;
+		//if (_kbhit())				//非阻塞函数 
+		//{
+		//	ch = _getch();			//无回显接受输入
+		//	switch (ch)
+		//	{
+		//	case ' ':
+		//		g_isFire = true;
+		//		g_isBulExist++;
+		//		break;
+		//	default:
+		//		break;
+		//	}
+		//}
 
 
-		
-	
 		if (g_isFire == 1)
 		{
-			static BULLET bullet{ {tank.body[0].X, tank.body[0].Y}, tank.dir };
+			//static BULLET bullet{ {tank.body[0].X, tank.body[0].Y}, tank.dir };
+			static BULLET bullet;
 
+
+			if (g_isBulExist == 1)
+			{
+				bullet = { {tank.body[0].X, tank.body[0].Y}, tank.dir };
+				g_isBulExist++;
+			}
+			
 			//子弹移动
-			if (clock() - nTime2 >= 300)
+			if (clock() - nTime2 >= 50)
 			{
 				nTime2 = clock();
 				if (g_isBulExist)

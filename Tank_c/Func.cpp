@@ -57,7 +57,8 @@ void DrawMapBorder()
 			if (g_MAP[x][y] == 1)
 			{
 				Gotoxy(x, y);
-				printf("※");		//占2字符
+				//printf("※");		//占2字符
+				printf("■");
 			}
 		}
 	}
@@ -158,9 +159,9 @@ void MoveTank(PTANK ptank)
 			}
 			ptank->dir = RIGHT;
 			break;
-		case 'p':
+		case ' ':
 			g_isFire = true;
-			g_isBulExist = true;
+			g_isBulExist++;
 			break;
 		default:
 			break;
@@ -190,6 +191,7 @@ void CleanTankTail(COORD oldCore,PCOORD oldBody)
 
 void DrawTank(PTANK ptank)
 {
+	setColor(10, 0);
 	Gotoxy(ptank->core.X, ptank->core.Y);//中心点
 	printf("■");
 	for (int i = 0; i < 5; i++)//其他点
@@ -197,6 +199,7 @@ void DrawTank(PTANK ptank)
 		Gotoxy(ptank->body[i].X, ptank->body[i].Y);
 		printf("■");
 	}
+	setColor(7, 0);
 }
 
 void SetTankShape(PTANK ptank)
@@ -275,17 +278,30 @@ void CleanBullet(COORD oldBulCore)
 }
 void DrawBullet(PBULLET pbullet)
 {
+	//碰到边界，换成边界的颜色，实现子弹消失的效果
+	if (pbullet->core.X <= 0 ||
+		pbullet->core.X >= MAP_X_WALL / 2 ||
+		pbullet->core.Y <= 0 ||
+		pbullet->core.Y >= MAP_Y - 1)
+	{
+		setColor(7, 0);
+	}
+	else
+	{
+		setColor(12, 0);
+	}
 	Gotoxy(pbullet->core.X, pbullet->core.Y);
-	printf("□");
+	printf("■");
+	setColor(7, 0);
 }
 
 void IsBulExist(PBULLET pbullet)
 {
 	if (pbullet->core.X <= 0 ||
-		pbullet->core.X >= MAP_X_WALL / 2 - 1 ||
+		pbullet->core.X >= MAP_X_WALL / 2 ||
 		pbullet->core.Y <= 0 ||
 		pbullet->core.Y >= MAP_Y - 1)
 	{
-		g_isBulExist = false;
+		g_isBulExist = 0;
 	}
 }
