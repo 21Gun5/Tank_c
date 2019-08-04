@@ -22,3 +22,9 @@ typedef struct _TANK
 	COORD body[5];
 	enum direction dir;	//·½Ïò
 }TANK, * PTANK;
+
+typedef struct _BULLET
+{
+	COORD core;
+	enum  direction dir;
+}BULLET,*PBULLET;

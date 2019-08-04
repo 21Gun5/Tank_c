@@ -117,27 +117,53 @@ void MoveTank(PTANK ptank)
 	if (_kbhit())				//非阻塞函数 
 	{
 		ch = _getch();			//无回显接受输入
+
 		switch (ch)
 		{
 		case 'w':
-			ptank->core.Y--;
+			if (ptank->core.Y > 2)//不可出边界
+			{
+				ptank->core.Y--;
+				ptank->dir = UP;
+				break;
+			}
 			ptank->dir = UP;
 			break;
 		case 's':
-			ptank->core.Y++;
+			if (ptank->core.Y < MAP_Y - 3)
+			{
+				ptank->core.Y++;
+				ptank->dir = DOWN;
+				break;
+			}
 			ptank->dir = DOWN;
 			break;
 		case 'a':
-			ptank->core.X--;
+			if (ptank->core.X > 2)
+			{
+				ptank->core.X--;
+				ptank->dir = LEFT;
+				break;
+			}
 			ptank->dir = LEFT;
 			break;
 		case 'd':
-			ptank->core.X++;
+			if (ptank->core.X < MAP_X_WALL/2 - 2)
+			{
+				ptank->core.X++;
+				ptank->dir = RIGHT;
+				break;
+			}
 			ptank->dir = RIGHT;
 			break;
+		//case 'p':
+		//	BULLET bullet = {ptank->core};
+		//	break;
+
 		default:
 			break;
 		}
+
 	}
 
 	SetTankShape(ptank);//每次移动后都要重新设置形态
@@ -154,7 +180,6 @@ void CleanTankTail(COORD oldCore,PCOORD oldBody)
 	}
 }
 
-
 void DrawTank(PTANK ptank)
 {
 	Gotoxy(ptank->core.X, ptank->core.Y);//中心点
@@ -165,7 +190,6 @@ void DrawTank(PTANK ptank)
 		printf("■");
 	}
 }
-
 
 void SetTankShape(PTANK ptank)
 {
