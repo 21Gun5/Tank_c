@@ -9,7 +9,15 @@ void setColor(unsigned short ForeColor, unsigned short BackGroundColor);//设置颜
 void DrawWelcome();//欢迎界面
 void SelectAction();//开始/退出游戏
 void DrawMapBorder();//地图边界
+
 void MoveTank(PTANK ptank);//移动坦克
+//void MoveTank(PTANK ptank, PBULLET pbullet);//移动坦克
 void CleanTankTail(COORD oldCore, PCOORD oldBody);//清除旧坦克
 void DrawTank(PTANK ptank);//打印坦克
 void SetTankShape(PTANK ptank);//根据方向选择坦克形态
+
+void MoveBullet(PBULLET pbullet);
+void CleanBullet(COORD oldBulCore);
+void DrawBullet(PBULLET pbullet);
+
+void IsBulExist(PBULLET pbullet);

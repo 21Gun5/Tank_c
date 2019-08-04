@@ -87,7 +87,9 @@ void setColor(unsigned short ForeColor, unsigned short BackGroundColor)
 
 void SelectAction()
 {
-	int input = _getch() - '0';	//无回显接收；-'0'保证在0-9，而非ASCII
+	
+	//int input = _getch() - '0';	//无回显接收；-'0'保证在0-9，而非ASCII
+	int input = 1;
 	SetCursorState(false);		//输入完隐藏光标
 
 	switch (input)
@@ -108,10 +110,10 @@ void SelectAction()
 		printf("输入错误\n");
 		break;
 	}
-	//return input;
 }
 
 void MoveTank(PTANK ptank)
+//void MoveTank(PTANK ptank,PBULLET pbullet)
 {
 	char ch = 0;
 	if (_kbhit())				//非阻塞函数 
@@ -156,17 +158,23 @@ void MoveTank(PTANK ptank)
 			}
 			ptank->dir = RIGHT;
 			break;
-		//case 'p':
-		//	BULLET bullet = {ptank->core};
-		//	break;
-
+		case 'p':
+			g_isFire = true;
+			g_isBulExist = true;
+			break;
 		default:
 			break;
 		}
 
 	}
-
 	SetTankShape(ptank);//每次移动后都要重新设置形态
+
+	//若开火，设置子弹位置及方向
+	//if (g_isFire)
+	//{
+	//	pbullet->core = ptank->body[0];
+	//	pbullet->dir = ptank->dir;
+	//}
 }
 
 void CleanTankTail(COORD oldCore,PCOORD oldBody)
@@ -224,5 +232,60 @@ void SetTankShape(PTANK ptank)
 		ptank->body[2] = { ptank->core.X , ptank->core.Y - 1 };
 		ptank->body[3] = { ptank->core.X - 1, ptank->core.Y + 1 };
 		ptank->body[4] = { ptank->core.X - 1, ptank->core.Y - 1 };
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void MoveBullet(PBULLET pbullet)
+{
+	switch (pbullet->dir)
+	{
+	case UP:
+		pbullet->core.Y--;
+		break;
+	case DOWN:
+		pbullet->core.Y++;
+		break;
+	case LEFT:
+		pbullet->core.X--;
+		break;
+	case RIGHT:
+		pbullet->core.X++;
+		break;
+	default:
+		break;
+	}
+
+
+}
+void CleanBullet(COORD oldBulCore)
+{
+	Gotoxy(oldBulCore.X, oldBulCore.Y);
+	printf("  ");
+}
+void DrawBullet(PBULLET pbullet)
+{
+	Gotoxy(pbullet->core.X, pbullet->core.Y);
+	printf("□");
+}
+
+void IsBulExist(PBULLET pbullet)
+{
+	if (pbullet->core.X <= 0 ||
+		pbullet->core.X >= MAP_X_WALL / 2 - 1 ||
+		pbullet->core.Y <= 0 ||
+		pbullet->core.Y >= MAP_Y - 1)
+	{
+		g_isBulExist = false;
 	}
 }
