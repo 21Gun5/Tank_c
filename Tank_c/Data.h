@@ -7,11 +7,9 @@
 #define MAP_X_WALL 60	//右边界
 #define 开始游戏 1
 #define 退出游戏 2
+#define 我方坦克 0
+#define 敌方坦克 1
 
-#define 未开火 0
-#define 开火且未赋值 1
-#define 开火且运动 2
-#define 消失 0
 
 
 //全局变量

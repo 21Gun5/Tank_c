@@ -4,14 +4,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
+#include <time.h>
 
 //系统功能
-void Gotoxy(unsigned x, unsigned y)
+void GotoxyAndPrint(unsigned x, unsigned y, const char* str)
 {
 	COORD cur;
 	cur.X = x * 2;
 	cur.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
+	printf(str);
 }
 void SetCursorState(bool b)
 {
@@ -51,6 +53,9 @@ void GameInit()
 
 	//设置标题
 	system("title Tank");
+
+	//初始化随机数种子
+	srand((unsigned int)time(0));
 }
 void DrawMapBorder()
 {
@@ -61,9 +66,9 @@ void DrawMapBorder()
 		{
 			if (g_MAP[x][y] == 1)
 			{
-				Gotoxy(x, y);
+				GotoxyAndPrint(x, y, "■");
 				//printf("※");		//占2字符
-				printf("■");
+				//printf("■");
 			}
 		}
 	}
@@ -71,16 +76,16 @@ void DrawMapBorder()
 void DrawWelcome()
 {
 	//打印图案
-	Gotoxy(MAP_X / 2 - 25, MAP_Y / 2-10);
-	printf("Welcome!");
+	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2-10, "Welcome!");
+	//printf("Welcome!");
 
 	//提示信息
-	Gotoxy(MAP_X / 2 - 25, MAP_Y / 2 - 6);
-	printf("1. 新游戏\n");
-	Gotoxy(MAP_X / 2 - 25, MAP_Y / 2 - 4);
-	printf("2. 退出游戏\n");
-	Gotoxy(MAP_X / 2 - 25, MAP_Y / 2 - 2);
-	printf( "请输入选择-> ");
+	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 - 6, "1. 新游戏\n");
+	//printf("1. 新游戏\n");
+	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 - 4, "2. 退出游戏\n");
+	//printf("2. 退出游戏\n");
+	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 - 2, "请输入选择-> ");
+	//printf( "请输入选择-> ");
 	SetCursorState(true);			//用户输入时，光标可见
 }
 void SelectAction()
@@ -99,49 +104,79 @@ void SelectAction()
 	}
 	case 退出游戏:
 	{
-		Gotoxy(MAP_X / 2 - 25, MAP_Y / 2 + 3);
-		printf("Bye! \n");
+		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "Bye! \n");
+		//printf("Bye! \n");
 		break;
 	}
 	default:
-		Gotoxy(MAP_X / 2 - 25, MAP_Y / 2 + 3);
-		printf("输入错误\n");
+		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "输入错误\n");
+		//printf("输入错误\n");
 		break;
 	}
 }
 
 //坦克相关
-void ManipulateTank(PTANK ptank)
+void ManipulateTank(PTANK ptank,int who)
 {
-	char ch = 0;
-	if (_kbhit())				//非阻塞函数 
+	if (who == 我方坦克)
 	{
-		ch = _getch();			//无回显接受输入
-
-		switch (ch)
+		char ch = 0;
+		if (_kbhit())				//非阻塞函数 
 		{
-		case 'w':
-			if (!IsTankMeetOther(ptank, ch))
+			ch = _getch();			//无回显接受输入
+			switch (ch)
+			{
+			case 'w':
+				if (!IsTankMeetOther(ptank, ch))
+					ptank->core.Y--;
+				ptank->dir = UP;
+				break;
+			case 's':
+				if (!IsTankMeetOther(ptank, ch))
+					ptank->core.Y++;
+				ptank->dir = DOWN;
+				break;
+			case 'a':
+				if (!IsTankMeetOther(ptank, ch))
+					ptank->core.X--;
+				ptank->dir = LEFT;
+				break;
+			case 'd':
+				if (!IsTankMeetOther(ptank, ch))
+					ptank->core.X++;
+				ptank->dir = RIGHT;
+				break;
+			case ' ':
+				g_isBulExist++;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	else if (who == 敌方坦克)
+	{
+		switch (rand() % 4)
+		{
+		case UP:
+			if (!IsTankMeetOther(ptank, 'w'))
 				ptank->core.Y--;
 			ptank->dir = UP;
 			break;
-		case 's':
-			if (!IsTankMeetOther(ptank, ch))
+		case DOWN:
+			if (!IsTankMeetOther(ptank, 's'))
 				ptank->core.Y++;
 			ptank->dir = DOWN;
 			break;
-		case 'a':
-			if (!IsTankMeetOther(ptank, ch))
+		case LEFT:
+			if (!IsTankMeetOther(ptank, 'a'))
 				ptank->core.X--;
 			ptank->dir = LEFT;
 			break;
-		case 'd':
-			if (!IsTankMeetOther(ptank, ch))
+		case RIGHT:
+			if (!IsTankMeetOther(ptank, 'd'))
 				ptank->core.X++;
 			ptank->dir = RIGHT;
-			break;
-		case ' ':
-			g_isBulExist++;
 			break;
 		default:
 			break;
@@ -151,25 +186,36 @@ void ManipulateTank(PTANK ptank)
 }
 void CleanTankTail(COORD oldCore,PCOORD oldBody)
 {
-	Gotoxy(oldCore.X, oldCore.Y);//中心点
-	printf("  ");		//清尾用2空格
+	GotoxyAndPrint(oldCore.X, oldCore.Y, "  ");//中心点
+	//printf("  ");		//清尾用2空格
 	for (int i = 0; i < 5; i++)//其他点
 	{
-		Gotoxy(oldBody[i].X, oldBody[i].Y);
-		printf("  ");
+		GotoxyAndPrint(oldBody[i].X, oldBody[i].Y, "  ");
+		//printf("  ");
 	}
 }
-void DrawTank(PTANK ptank)
+void DrawTank(PTANK ptank,int who)
 {
-	setColor(10, 0);
-	Gotoxy(ptank->core.X, ptank->core.Y);//中心点
-	printf("■");
-	for (int i = 0; i < 5; i++)//其他点
+	if (who == 我方坦克)
 	{
-		Gotoxy(ptank->body[i].X, ptank->body[i].Y);
-		printf("■");
+		setColor(10, 0);
+		GotoxyAndPrint(ptank->core.X, ptank->core.Y, "■");//中心点
+		for (int i = 0; i < 5; i++)//其他点
+		{
+			GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "■");
+		}
+		setColor(7, 0);
 	}
-	setColor(7, 0);
+	else if (who == 敌方坦克)
+	{
+		setColor(10, 0);
+		GotoxyAndPrint(ptank->core.X, ptank->core.Y, "□");//中心点
+		for (int i = 0; i < 5; i++)//其他点
+		{
+			GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "□");
+		}
+		setColor(7, 0);
+	}
 }
 void SetTankShape(PTANK ptank)
 {
@@ -208,11 +254,9 @@ void SetTankShape(PTANK ptank)
 }
 bool IsTankMeetOther(PTANK ptank,char dir)
 {
-
 	switch (dir)
 	{
 	case 'w':
-	
 		//是否撞边界
 		if (ptank->core.Y <= 2)
 		{
@@ -226,7 +270,6 @@ bool IsTankMeetOther(PTANK ptank,char dir)
 			return true;
 		}
 		break;
-	
 	case 's':
 		//是否撞边界
 		if (ptank->core.Y >= MAP_Y - 3)
@@ -300,8 +343,8 @@ void MoveBullet(PBULLET pbullet)
 }
 void CleanBullet(COORD oldBulCore)
 {
-	Gotoxy(oldBulCore.X, oldBulCore.Y);
-	printf("  ");
+	GotoxyAndPrint(oldBulCore.X, oldBulCore.Y, "  ");
+	//printf("  ");
 }
 void DrawBullet(PBULLET pbullet)
 {
@@ -317,15 +360,17 @@ void DrawBullet(PBULLET pbullet)
 	{
 		setColor(12, 0);
 	}
-	Gotoxy(pbullet->core.X, pbullet->core.Y);
+	//GotoxyAndPrint(pbullet->core.X, pbullet->core.Y);
 	//碰到障碍，将子弹画为空格，实现子弹消失
 	if (g_Bar[pbullet->core.X][pbullet->core.Y] == 1)
 	{
-		printf("  ");
+		GotoxyAndPrint(pbullet->core.X, pbullet->core.Y, "  ");
+		//printf("  ");
 	}
 	else
 	{
-		printf("■");
+		GotoxyAndPrint(pbullet->core.X, pbullet->core.Y, "■");
+		//printf("■");
 	}	
 	setColor(7, 0);
 }
@@ -346,7 +391,6 @@ void IsBulMeetOther(PBULLET pbullet)
 		g_Bar[pbullet->core.X][pbullet->core.Y] = 0;
 	}
 }
-
 
 //障碍物相关
 void BarrierInit()
@@ -376,8 +420,8 @@ void DrawBarr()
 		{
 			if(g_Bar[x][y] == 1)
 			{
-				Gotoxy(x, y);
-				printf("■");
+				GotoxyAndPrint(x, y, "■");
+				//printf("■");
 			}
 		}
 	}

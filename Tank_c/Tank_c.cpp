@@ -6,13 +6,29 @@
 
 int main()
 {
+	//模拟多线程
 	int time4Tank = 0;
+	int time4EnemyTank = 0;
 	int time4Bullet = 0;
 
+	//我方坦克
 	TANK tank = { {MAP_X_WALL / 4, MAP_Y / 2}, {0},UP };
-	SetTankShape(&tank);//设置坦克形态
+	SetTankShape(&tank);//设置我方坦克形态
+
+	//敌方坦克
+	TANK enemyTank[3] = {
+		{{2, 2}, {0},DOWN },
+		{{MAP_X_WALL / 4, 2}, {0},DOWN },
+		{{MAP_X_WALL/2 -2, 2}, {0},DOWN }
+	};
+	for (int i = 0; i < 3; i++) {SetTankShape(&enemyTank[i]);}//设置敌方坦克形态
+	//TANK enemyTank = { {MAP_X_WALL/2 - 2, 2}, {0},DOWN };
+	//SetTankShape(&enemyTank);
+	
+	//子弹创建
 	BULLET bullet = {{0},UP};
 
+	//基本流程
 	GameInit();
 	DrawWelcome();
 	SelectAction();
@@ -20,20 +36,21 @@ int main()
 	BarrierInit();
 	DrawBarr();
 
+	//主循环
 	while (g_isRunning)
 	{
-		//坦克移动线程
+		//我方坦克移动线程
 		if (clock() - time4Tank >= 100)
 		{
 			time4Tank = clock();
 			COORD oldCore = tank.core;
 			COORD oldBody[5] = { tank.body[0],tank.body[1],tank.body[2],tank.body[3],tank.body[4] };
-			ManipulateTank(&tank);
+			ManipulateTank(&tank,我方坦克);
 			CleanTankTail(oldCore, oldBody);
-			DrawTank(&tank);
+			DrawTank(&tank,我方坦克);
 		}
 
-		//子弹移动线程
+		//我方子弹移动线程
 		if (g_isBulExist != 0)//1和2均可，只要不为0
 		{
 			//子弹赋值
@@ -42,7 +59,6 @@ int main()
 				bullet = { {tank.body[0].X, tank.body[0].Y}, tank.dir };
 				g_isBulExist++;//==2已赋值状态
 			}
-
 			//子弹移动
 			if (clock() - time4Bullet >= 50)
 			{
@@ -54,6 +70,22 @@ int main()
 				IsBulMeetOther(&bullet);
 			}
 		}
+
+		//敌方坦克移动线程
+		if (clock() - time4EnemyTank >= 500)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				time4EnemyTank = clock();
+				COORD oldCore = enemyTank[i].core;
+				COORD oldBody[5] = { enemyTank[i].body[0],enemyTank[i].body[1],enemyTank[i].body[2],enemyTank[i].body[3],enemyTank[i].body[4] };
+				ManipulateTank(&enemyTank[i], 敌方坦克);
+				CleanTankTail(oldCore, oldBody);
+				DrawTank(&enemyTank[i], 敌方坦克);
+			}
+
+		}
+
 	}
 	return 0;
 }
