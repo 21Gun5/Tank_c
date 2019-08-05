@@ -189,7 +189,7 @@ void ManipulateTank(PTANK ptank,int who, PTANK penemytank)
 
 	SetTankShape(ptank);//每次移动后都要重新设置形态
 }
-void ManipulateTank2(PTANK ptank, int who)
+void ManipulateTank2(PTANK ptank, int who,PTANK pmytank, PTANK penemytank)
 {
 	//if (who == 我方坦克)
 	//{
@@ -232,22 +232,22 @@ void ManipulateTank2(PTANK ptank, int who)
 		switch (rand() % 4)
 		{
 		case UP:
-			if (!IsTankMeetOther2(ptank, UP))
+			if (!IsTankMeetOther2(ptank, UP,  pmytank,  penemytank))
 				ptank->core.Y--;
 			ptank->dir = UP;
 			break;
 		case DOWN:
-			if (!IsTankMeetOther2(ptank, DOWN))
+			if (!IsTankMeetOther2(ptank, DOWN,pmytank, penemytank))
 				ptank->core.Y++;
 			ptank->dir = DOWN;
 			break;
 		case LEFT:
-			if (!IsTankMeetOther2(ptank, LEFT))
+			if (!IsTankMeetOther2(ptank, LEFT,pmytank, penemytank))
 				ptank->core.X--;
 			ptank->dir = LEFT;
 			break;
 		case RIGHT:
-			if (!IsTankMeetOther2(ptank, RIGHT))
+			if (!IsTankMeetOther2(ptank, RIGHT, pmytank, penemytank))
 				ptank->core.X++;
 			ptank->dir = RIGHT;
 			break;
@@ -450,7 +450,7 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 	}
 	return false;
 }
-bool IsTankMeetOther2(PTANK ptank, int dir)
+bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 {
 	switch (dir)
 	{
@@ -467,8 +467,33 @@ bool IsTankMeetOther2(PTANK ptank, int dir)
 		{
 			return true;
 		}
-		//是否撞敌方坦克
-		//if
+		//是否撞我方坦克
+		if (
+			((ptank->core.X == pmytank->core.X - 0) && (ptank->core.Y - pmytank->core.Y == 3)) ||
+			((ptank->core.X == pmytank->core.X - 1) && (ptank->core.Y - pmytank->core.Y == 3)) ||
+			((ptank->core.X == pmytank->core.X - 2) && (ptank->core.Y - pmytank->core.Y == 3)) ||
+			((ptank->core.X == pmytank->core.X + 1) && (ptank->core.Y - pmytank->core.Y == 3)) ||
+			((ptank->core.X == pmytank->core.X + 2) && (ptank->core.Y - pmytank->core.Y == 3))
+			)//要==3,而非<=，只有在挨着的时候可被当，如果小于，虽没挨着敌坦1，但距离却小于2，被2干扰
+		{
+			return true;
+		}
+		//是否撞其他敌方坦克
+		for (int i = 0; i < 3; i++)
+		{
+			if (ptank->core.X == penemytank[i].core.X && ptank->core.Y == penemytank[i].core.Y)//排除自己
+				continue;
+			if (
+				((ptank->core.X == penemytank[i].core.X) && (ptank->core.Y - penemytank[i].core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X - 1) && (ptank->core.Y - penemytank[i].core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X - 2) && (ptank->core.Y - penemytank[i].core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X + 1) && (ptank->core.Y - penemytank[i].core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X + 2) && (ptank->core.Y - penemytank[i].core.Y == 3))
+				)//要==3,而非<=，只有在挨着的时候可被当，如果小于，虽没挨着敌坦1，但距离却小于2，被2干扰
+			{
+				return true;
+			}
+		}
 		break;
 	case DOWN:
 		//是否撞边界
@@ -482,6 +507,33 @@ bool IsTankMeetOther2(PTANK ptank, int dir)
 			g_Bar[ptank->core.X + 1][ptank->core.Y + 2] == 1)
 		{
 			return true;
+		}
+		//是否撞我方坦克
+		if (
+			((ptank->core.X == pmytank->core.X - 0) && (pmytank->core.Y - ptank->core.Y == 3)) ||
+			((ptank->core.X == pmytank->core.X - 1) && (pmytank->core.Y - ptank->core.Y == 3)) ||
+			((ptank->core.X == pmytank->core.X - 2) && (pmytank->core.Y - ptank->core.Y == 3)) ||
+			((ptank->core.X == pmytank->core.X + 1) && (pmytank->core.Y - ptank->core.Y == 3)) ||
+			((ptank->core.X == pmytank->core.X + 2) && (pmytank->core.Y - ptank->core.Y == 3))
+			)
+		{
+			return true;
+		}
+		//是否撞其他敌方坦克
+		for (int i = 0; i < 3; i++)
+		{
+			if (ptank->core.X == penemytank[i].core.X && ptank->core.Y == penemytank[i].core.Y)//排除自己
+				continue;
+			if (
+				((ptank->core.X == penemytank[i].core.X) && (penemytank[i].core.Y - ptank->core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X - 1) && (penemytank[i].core.Y - ptank->core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X - 2) && (penemytank[i].core.Y - ptank->core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X + 1) && (penemytank[i].core.Y - ptank->core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X + 2) && (penemytank[i].core.Y - ptank->core.Y == 3))
+				)
+			{
+				return true;
+			}
 		}
 		break;
 	case LEFT:
@@ -497,6 +549,33 @@ bool IsTankMeetOther2(PTANK ptank, int dir)
 		{
 			return true;
 		}
+		//是否撞我方坦克
+		if (
+			((ptank->core.Y == pmytank->core.Y - 0) && (ptank->core.X - pmytank->core.X == 3)) ||
+			((ptank->core.Y == pmytank->core.Y - 1) && (ptank->core.X - pmytank->core.X == 3)) ||
+			((ptank->core.Y == pmytank->core.Y - 2) && (ptank->core.X - pmytank->core.X == 3)) ||
+			((ptank->core.Y == pmytank->core.Y + 1) && (ptank->core.X - pmytank->core.X == 3)) ||
+			((ptank->core.Y == pmytank->core.Y + 2) && (ptank->core.X - pmytank->core.X == 3))
+			)
+		{
+			return true;
+		}
+		//是否撞其他敌方坦克
+		for (int i = 0; i < 3; i++)
+		{
+			if (ptank->core.X == penemytank[i].core.X && ptank->core.Y == penemytank[i].core.Y)//排除自己
+				continue;
+			if (
+				((ptank->core.Y == penemytank[i].core.Y) && (ptank->core.X - penemytank[i].core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y - 1) && (ptank->core.X - penemytank[i].core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y - 2) && (ptank->core.X - penemytank[i].core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y + 1) && (ptank->core.X - penemytank[i].core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y + 2) && (ptank->core.X - penemytank[i].core.X == 3))
+				)
+			{
+				return true;
+			}
+		}
 		break;
 	case RIGHT:
 		//是否撞边界
@@ -510,6 +589,33 @@ bool IsTankMeetOther2(PTANK ptank, int dir)
 			g_Bar[ptank->core.X + 2][ptank->core.Y + 1] == 1)
 		{
 			return true;
+		}
+		//是否撞我方坦克
+		if (
+			((ptank->core.Y == pmytank->core.Y - 0) && (pmytank->core.X - ptank->core.X == 3)) ||
+			((ptank->core.Y == pmytank->core.Y - 1) && (pmytank->core.X - ptank->core.X == 3)) ||
+			((ptank->core.Y == pmytank->core.Y - 2) && (pmytank->core.X - ptank->core.X == 3)) ||
+			((ptank->core.Y == pmytank->core.Y + 1) && (pmytank->core.X - ptank->core.X == 3)) ||
+			((ptank->core.Y == pmytank->core.Y + 2) && (pmytank->core.X - ptank->core.X == 3))
+			)
+		{
+			return true;
+		}
+		//是否撞其他敌方坦克
+		for (int i = 0; i < 3; i++)
+		{
+			if (ptank->core.X == penemytank[i].core.X && ptank->core.Y == penemytank[i].core.Y)//排除自己
+				continue;
+			if (
+				((ptank->core.Y == penemytank[i].core.Y) && (penemytank[i].core.X - ptank->core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y - 1) && (penemytank[i].core.X - ptank->core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y - 2) && (penemytank[i].core.X - ptank->core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y + 1) && (penemytank[i].core.X - ptank->core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y + 2) && (penemytank[i].core.X - ptank->core.X == 3))
+				)
+			{
+				return true;
+			}
 		}
 		break;
 	default:

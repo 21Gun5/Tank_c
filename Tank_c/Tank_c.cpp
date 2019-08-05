@@ -79,7 +79,7 @@ int main()
 				time4EnemyTank = clock();
 				COORD oldCore = enemyTank[i].core;
 				COORD oldBody[5] = { enemyTank[i].body[0],enemyTank[i].body[1],enemyTank[i].body[2],enemyTank[i].body[3],enemyTank[i].body[4] };
-				//ManipulateTank2(&enemyTank[i], 敌方坦克);
+				ManipulateTank2(&enemyTank[i], 敌方坦克,&tank,enemyTank);
 				CleanTankTail(oldCore, oldBody);
 				DrawTank(&enemyTank[i], 敌方坦克);
 			}
