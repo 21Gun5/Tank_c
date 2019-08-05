@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <conio.h>
 
+//系统功能
 void Gotoxy(unsigned x, unsigned y)
 {
 	COORD cur;
@@ -12,7 +13,6 @@ void Gotoxy(unsigned x, unsigned y)
 	cur.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
 }
-
 void SetCursorState(bool b)
 {
 
@@ -22,7 +22,13 @@ void SetCursorState(bool b)
 	CursorInfo.bVisible = b;					//显示/隐藏控制台光标
 	SetConsoleCursorInfo(handle, &CursorInfo);	//设置控制台光标状态
 }
+void setColor(unsigned short ForeColor, unsigned short BackGroundColor)
+{
+	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);					//获取当前窗口句柄
+	SetConsoleTextAttribute(handle, ForeColor + BackGroundColor * 0x10);//设置颜色
+}
 
+//游戏相关
 void GameInit()
 {
 	//设置地图
@@ -46,7 +52,6 @@ void GameInit()
 	//设置标题
 	system("title Tank");
 }
-
 void DrawMapBorder()
 {
 	system("cls");						//换页则清屏
@@ -63,7 +68,6 @@ void DrawMapBorder()
 		}
 	}
 }
-
 void DrawWelcome()
 {
 	//打印图案
@@ -79,13 +83,6 @@ void DrawWelcome()
 	printf( "请输入选择-> ");
 	SetCursorState(true);			//用户输入时，光标可见
 }
-
-void setColor(unsigned short ForeColor, unsigned short BackGroundColor)
-{
-	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);					//获取当前窗口句柄
-	SetConsoleTextAttribute(handle, ForeColor + BackGroundColor * 0x10);//设置颜色
-}
-
 void SelectAction()
 {
 	
@@ -113,8 +110,8 @@ void SelectAction()
 	}
 }
 
+//坦克相关
 void MoveTank(PTANK ptank)
-//void MoveTank(PTANK ptank,PBULLET pbullet)
 {
 	char ch = 0;
 	if (_kbhit())				//非阻塞函数 
@@ -124,39 +121,23 @@ void MoveTank(PTANK ptank)
 		switch (ch)
 		{
 		case 'w':
-			if (ptank->core.Y > 2)//不可出边界
-			{
+			if (!IsTankMeetOther(ptank, ch))
 				ptank->core.Y--;
-				ptank->dir = UP;
-				break;
-			}
 			ptank->dir = UP;
 			break;
 		case 's':
-			if (ptank->core.Y < MAP_Y - 3)
-			{
+			if (!IsTankMeetOther(ptank, ch))
 				ptank->core.Y++;
-				ptank->dir = DOWN;
-				break;
-			}
 			ptank->dir = DOWN;
 			break;
 		case 'a':
-			if (ptank->core.X > 2)
-			{
+			if (!IsTankMeetOther(ptank, ch))
 				ptank->core.X--;
-				ptank->dir = LEFT;
-				break;
-			}
 			ptank->dir = LEFT;
 			break;
 		case 'd':
-			if (ptank->core.X < MAP_X_WALL/2 - 2)
-			{
+			if (!IsTankMeetOther(ptank, ch))
 				ptank->core.X++;
-				ptank->dir = RIGHT;
-				break;
-			}
 			ptank->dir = RIGHT;
 			break;
 		case ' ':
@@ -166,18 +147,9 @@ void MoveTank(PTANK ptank)
 		default:
 			break;
 		}
-
 	}
 	SetTankShape(ptank);//每次移动后都要重新设置形态
-
-	//若开火，设置子弹位置及方向
-	//if (g_isFire)
-	//{
-	//	pbullet->core = ptank->body[0];
-	//	pbullet->dir = ptank->dir;
-	//}
 }
-
 void CleanTankTail(COORD oldCore,PCOORD oldBody)
 {
 	Gotoxy(oldCore.X, oldCore.Y);//中心点
@@ -188,7 +160,6 @@ void CleanTankTail(COORD oldCore,PCOORD oldBody)
 		printf("  ");
 	}
 }
-
 void DrawTank(PTANK ptank)
 {
 	setColor(10, 0);
@@ -201,7 +172,6 @@ void DrawTank(PTANK ptank)
 	}
 	setColor(7, 0);
 }
-
 void SetTankShape(PTANK ptank)
 {
 	if (ptank->dir == UP)
@@ -237,18 +207,76 @@ void SetTankShape(PTANK ptank)
 		ptank->body[4] = { ptank->core.X - 1, ptank->core.Y - 1 };
 	}
 }
+bool IsTankMeetOther(PTANK ptank,char dir)
+{
 
+	switch (dir)
+	{
+	case 'w':
+	
+		//是否撞边界
+		if (ptank->core.Y <= 2)
+		{
+			return true;
+		}
+		//是否撞障碍物
+		if (g_Bar[ptank->core.X][ptank->core.Y - 2] == 1||
+			g_Bar[ptank->core.X-1][ptank->core.Y - 2] == 1||
+			g_Bar[ptank->core.X+1][ptank->core.Y - 2] == 1)
+		{
+			return true;
+		}
+		break;
+	
+	case 's':
+		//是否撞边界
+		if (ptank->core.Y >= MAP_Y - 3)
+		{
+			return true;
+		}
+		//是否撞障碍物
+		if (g_Bar[ptank->core.X][ptank->core.Y + 2] == 1 ||
+			g_Bar[ptank->core.X - 1][ptank->core.Y + 2] == 1 ||
+			g_Bar[ptank->core.X + 1][ptank->core.Y + 2] == 1)
+		{
+			return true;
+		}
+		break;
+	case 'a':
+		//是否撞边界
+		if (ptank->core.X <= 2)
+		{
+			return true;
+		}
+		//是否撞障碍物
+		if (g_Bar[ptank->core.X-2][ptank->core.Y] == 1 ||
+			g_Bar[ptank->core.X - 2][ptank->core.Y -1] == 1 ||
+			g_Bar[ptank->core.X -2][ptank->core.Y + 1] == 1)
+		{
+			return true;
+		}
+		break;
+	case 'd':
+		//是否撞边界
+		if (ptank->core.X >= MAP_X_WALL / 2 - 2)
+		{
+			return true;
+		}
+		//是否撞障碍物
+		if (g_Bar[ptank->core.X + 2][ptank->core.Y] == 1 ||
+			g_Bar[ptank->core.X + 2][ptank->core.Y - 1] == 1 ||
+			g_Bar[ptank->core.X + 2][ptank->core.Y + 1] == 1)
+		{
+			return true;
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
+}
 
-
-
-
-
-
-
-
-
-
-
+//子弹相关
 void MoveBullet(PBULLET pbullet)
 {
 	switch (pbullet->dir)
@@ -294,7 +322,6 @@ void DrawBullet(PBULLET pbullet)
 	printf("■");
 	setColor(7, 0);
 }
-
 void IsBulExist(PBULLET pbullet)
 {
 	if (pbullet->core.X <= 0 ||
@@ -305,3 +332,40 @@ void IsBulExist(PBULLET pbullet)
 		g_isBulExist = 0;
 	}
 }
+
+//障碍物相关
+void BarrierInit()
+{
+	for (int x = 0; x < MAP_X_WALL; x++)
+	{
+		for (int y = 0; y < MAP_Y; y++)
+		{
+			if (
+				(x > MAP_X_WALL / 4 - 9 &&x < MAP_X_WALL / 4 - 5 &&y > MAP_Y / 2 - 9 &&y < MAP_Y/2 - 4) ||
+				(x < MAP_X_WALL / 4 + 9 &&x > MAP_X_WALL / 4 + 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 4)||
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 4)||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 4)
+				)
+			{
+				g_Bar[x][y] = 1;
+			}
+
+		}
+	}
+}
+void DrawBarr()
+{
+	for (int x = 0; x < MAP_X_WALL; x++)
+	{
+		for (int y = 0; y < MAP_Y; y++)
+		{
+			if(g_Bar[x][y] == 1)
+			{
+				Gotoxy(x, y);
+				printf("■");
+			}
+		}
+	}
+
+}
+
