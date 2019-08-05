@@ -141,7 +141,7 @@ void MoveTank(PTANK ptank)
 			ptank->dir = RIGHT;
 			break;
 		case ' ':
-			g_isFire = true;
+			//g_isFire = true;
 			g_isBulExist++;
 			break;
 		default:
@@ -319,11 +319,20 @@ void DrawBullet(PBULLET pbullet)
 		setColor(12, 0);
 	}
 	Gotoxy(pbullet->core.X, pbullet->core.Y);
-	printf("■");
+	//碰到障碍，将子弹画为空格，实现子弹消失
+	if (g_Bar[pbullet->core.X][pbullet->core.Y] == 1)
+	{
+		printf("  ");
+	}
+	else
+	{
+		printf("■");
+	}	
 	setColor(7, 0);
 }
-void IsBulExist(PBULLET pbullet)
+void IsBulMeetOther(PBULLET pbullet)
 {
+	//是否遇到边界
 	if (pbullet->core.X <= 0 ||
 		pbullet->core.X >= MAP_X_WALL / 2 ||
 		pbullet->core.Y <= 0 ||
@@ -331,7 +340,14 @@ void IsBulExist(PBULLET pbullet)
 	{
 		g_isBulExist = 0;
 	}
+	//是否遇到障碍物
+	if (g_Bar[pbullet->core.X][pbullet->core.Y] == 1)
+	{
+		g_isBulExist = 0;
+		g_Bar[pbullet->core.X][pbullet->core.Y] = 0;
+	}
 }
+
 
 //障碍物相关
 void BarrierInit()

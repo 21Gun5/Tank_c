@@ -12,7 +12,6 @@ void DrawWelcome();//欢迎界面
 void SelectAction();//开始/退出游戏
 void DrawMapBorder();//打印地图边界
 
-
 //坦克相关
 void MoveTank(PTANK ptank);//移动坦克
 void DrawTank(PTANK ptank);//打印坦克
@@ -24,7 +23,8 @@ bool IsTankMeetOther(PTANK ptank,char dir);//是否遇到其他障碍/敌方坦克/边界
 void MoveBullet(PBULLET pbullet);//移动子弹
 void CleanBullet(COORD oldBulCore);//清理旧子弹（画前必做
 void DrawBullet(PBULLET pbullet);//画子弹
-void IsBulExist(PBULLET pbullet);//检测子弹是否碰到障碍而消失
+void IsBulMeetOther(PBULLET pbullet);//检测子弹是否碰到障碍而消失
+//void IsBulMeetOther(PBULLET pbullet);//子弹打障碍/敌坦克
 
 //障碍物相关
 void BarrierInit();//初始化障碍物地图

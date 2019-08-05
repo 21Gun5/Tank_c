@@ -12,23 +12,18 @@ int main()
 	TANK tank = { {MAP_X_WALL / 4, MAP_Y / 2}, {0},UP };
 	SetTankShape(&tank);	//设置坦克形态
 	
-	
-
 	GameInit();
 	DrawWelcome();
 	SelectAction();
 	DrawMapBorder();
-
-	
 	BarrierInit();
 	DrawBarr();
-
 
 	//g_isRunning = 0;
 	while (g_isRunning)
 	{
 
-		//坦克移动
+		//坦克移动线程
 		if (clock() - nTime1 >= 100)
 		{
 			nTime1 = clock();
@@ -39,27 +34,26 @@ int main()
 			DrawTank(&tank);
 		}
 
-	
-		if (g_isFire == 1)
+		//子弹移动线程
+		if (g_isBulExist != 0)//1和2均可，只要不为0
 		{
-			static BULLET bullet;
-			if (g_isBulExist == 1)
+			//子弹创建及赋值
+			static BULLET bullet;//开火后才可创建对象
+			if (g_isBulExist == 1)//只有1时，才可赋值
 			{
-				bullet = { {tank.body[0].X, tank.body[0].Y}, tank.dir };
-				g_isBulExist++;
+				bullet = { {tank.body[0].X, tank.body[0].Y}, tank.dir };//参数由坦克提供
+				g_isBulExist++;//马上++，此时为2，只有1才可赋值
 			}
+
 			//子弹移动
 			if (clock() - nTime2 >= 50)
 			{
 				nTime2 = clock();
-				if (g_isBulExist)
-				{
-					COORD oldBulCore = bullet.core;
-					MoveBullet(&bullet);
-					CleanBullet(oldBulCore);
-					DrawBullet(&bullet);
-					IsBulExist(&bullet);
-				}
+				COORD oldBulCore = bullet.core;//记录下旧地址
+				MoveBullet(&bullet);//移动
+				CleanBullet(oldBulCore);//清理旧
+				DrawBullet(&bullet);//画
+				IsBulMeetOther(&bullet);//是否遇其他对象
 			}
 		}
 	}

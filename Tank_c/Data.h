@@ -11,7 +11,7 @@
 //全局变量
 extern int g_MAP[MAP_X][MAP_Y];	//地图数组
 extern bool g_isRunning;		//游戏是否运行
-extern bool g_isFire;			//是否发射子弹
+//extern bool g_isFire;			//是否发射子弹
 extern int g_isBulExist;		//子弹是否还存在（没打在边界或障碍物上
 extern int g_Bar[MAP_X_WALL][MAP_Y];//障碍物数组
 //extern PCOORD g_Bar;
