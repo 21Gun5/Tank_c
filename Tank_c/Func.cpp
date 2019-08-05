@@ -111,7 +111,7 @@ void SelectAction()
 }
 
 //坦克相关
-void MoveTank(PTANK ptank)
+void ManipulateTank(PTANK ptank)
 {
 	char ch = 0;
 	if (_kbhit())				//非阻塞函数 
@@ -141,7 +141,6 @@ void MoveTank(PTANK ptank)
 			ptank->dir = RIGHT;
 			break;
 		case ' ':
-			//g_isFire = true;
 			g_isBulExist++;
 			break;
 		default:

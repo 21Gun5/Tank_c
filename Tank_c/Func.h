@@ -13,7 +13,7 @@ void SelectAction();//开始/退出游戏
 void DrawMapBorder();//打印地图边界
 
 //坦克相关
-void MoveTank(PTANK ptank);//移动坦克
+void ManipulateTank(PTANK ptank);//移动坦克
 void DrawTank(PTANK ptank);//打印坦克
 void SetTankShape(PTANK ptank);//根据方向选择坦克形态
 void CleanTankTail(COORD oldCore, PCOORD oldBody);//清除旧坦克（画前必做
