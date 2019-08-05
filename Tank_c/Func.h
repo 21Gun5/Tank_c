@@ -13,11 +13,16 @@ void SelectAction();//开始/退出游戏
 void DrawMapBorder();//打印地图边界
 
 //坦克相关
-void ManipulateTank(PTANK ptank,int who);//移动坦克
+void ManipulateTank(PTANK ptank,int who,PTANK penemytank);//移动坦克
+//void ManipulateTank(PTANK ptank, int who);//移动坦克
+
 void DrawTank(PTANK ptank,int who);//打印坦克
 void SetTankShape(PTANK ptank);//根据方向选择坦克形态
 void CleanTankTail(COORD oldCore, PCOORD oldBody);//清除旧坦克（画前必做
-bool IsTankMeetOther(PTANK ptank,char dir);//是否遇到其他障碍/敌方坦克/边界
+bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank);//是否遇到其他障碍/敌方坦克/边界
+//bool IsTankMeetOther(PTANK ptank, int dir);//是否遇到其他障碍/敌方坦克/边界
+void ManipulateTank2(PTANK ptank, int who);
+bool IsTankMeetOther2(PTANK ptank, int dir);//是否遇到其他障碍/敌方坦克/边界
 
 //子弹相关
 void MoveBullet(PBULLET pbullet);//移动子弹

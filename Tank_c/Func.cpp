@@ -115,8 +115,12 @@ void SelectAction()
 	}
 }
 
+
+
+
 //坦克相关
-void ManipulateTank(PTANK ptank,int who)
+void ManipulateTank(PTANK ptank,int who, PTANK penemytank)
+//void ManipulateTank(PTANK ptank, int who)
 {
 	if (who == 我方坦克)
 	{
@@ -127,22 +131,22 @@ void ManipulateTank(PTANK ptank,int who)
 			switch (ch)
 			{
 			case 'w':
-				if (!IsTankMeetOther(ptank, ch))
+				if (!IsTankMeetOther(ptank, UP, penemytank))
 					ptank->core.Y--;
 				ptank->dir = UP;
 				break;
 			case 's':
-				if (!IsTankMeetOther(ptank, ch))
+				if (!IsTankMeetOther(ptank, DOWN, penemytank))
 					ptank->core.Y++;
 				ptank->dir = DOWN;
 				break;
 			case 'a':
-				if (!IsTankMeetOther(ptank, ch))
+				if (!IsTankMeetOther(ptank, LEFT, penemytank))
 					ptank->core.X--;
 				ptank->dir = LEFT;
 				break;
 			case 'd':
-				if (!IsTankMeetOther(ptank, ch))
+				if (!IsTankMeetOther(ptank, RIGHT, penemytank))
 					ptank->core.X++;
 				ptank->dir = RIGHT;
 				break;
@@ -154,27 +158,96 @@ void ManipulateTank(PTANK ptank,int who)
 			}
 		}
 	}
-	else if (who == 敌方坦克)
+	/*else if (who == 敌方坦克)
 	{
 		switch (rand() % 4)
 		{
 		case UP:
-			if (!IsTankMeetOther(ptank, 'w'))
+			if (!IsTankMeetOther(ptank, UP))
 				ptank->core.Y--;
 			ptank->dir = UP;
 			break;
 		case DOWN:
-			if (!IsTankMeetOther(ptank, 's'))
+			if (!IsTankMeetOther(ptank, DOWN))
 				ptank->core.Y++;
 			ptank->dir = DOWN;
 			break;
 		case LEFT:
-			if (!IsTankMeetOther(ptank, 'a'))
+			if (!IsTankMeetOther(ptank, LEFT))
 				ptank->core.X--;
 			ptank->dir = LEFT;
 			break;
 		case RIGHT:
-			if (!IsTankMeetOther(ptank, 'd'))
+			if (!IsTankMeetOther(ptank, RIGHT))
+				ptank->core.X++;
+			ptank->dir = RIGHT;
+			break;
+		default:
+			break;
+		}
+	}*/
+
+	SetTankShape(ptank);//每次移动后都要重新设置形态
+}
+void ManipulateTank2(PTANK ptank, int who)
+{
+	//if (who == 我方坦克)
+	//{
+	//	char ch = 0;
+	//	if (_kbhit())				//非阻塞函数 
+	//	{
+	//		ch = _getch();			//无回显接受输入
+	//		switch (ch)
+	//		{
+	//		case 'w':
+	//			if (!IsTankMeetOther(ptank, UP, ))
+	//				ptank->core.Y--;
+	//			ptank->dir = UP;
+	//			break;
+	//		case 's':
+	//			if (!IsTankMeetOther(ptank, DOWN))
+	//				ptank->core.Y++;
+	//			ptank->dir = DOWN;
+	//			break;
+	//		case 'a':
+	//			if (!IsTankMeetOther(ptank, LEFT))
+	//				ptank->core.X--;
+	//			ptank->dir = LEFT;
+	//			break;
+	//		case 'd':
+	//			if (!IsTankMeetOther(ptank, RIGHT))
+	//				ptank->core.X++;
+	//			ptank->dir = RIGHT;
+	//			break;
+	//		case ' ':
+	//			g_isBulExist++;
+	//			break;
+	//		default:
+	//			break;
+	//		}
+	//	}
+	//}
+	if (who == 敌方坦克)
+	{
+		switch (rand() % 4)
+		{
+		case UP:
+			if (!IsTankMeetOther2(ptank, UP))
+				ptank->core.Y--;
+			ptank->dir = UP;
+			break;
+		case DOWN:
+			if (!IsTankMeetOther2(ptank, DOWN))
+				ptank->core.Y++;
+			ptank->dir = DOWN;
+			break;
+		case LEFT:
+			if (!IsTankMeetOther2(ptank, LEFT))
+				ptank->core.X--;
+			ptank->dir = LEFT;
+			break;
+		case RIGHT:
+			if (!IsTankMeetOther2(ptank, RIGHT))
 				ptank->core.X++;
 			ptank->dir = RIGHT;
 			break;
@@ -184,6 +257,8 @@ void ManipulateTank(PTANK ptank,int who)
 	}
 	SetTankShape(ptank);//每次移动后都要重新设置形态
 }
+
+
 void CleanTankTail(COORD oldCore,PCOORD oldBody)
 {
 	GotoxyAndPrint(oldCore.X, oldCore.Y, "  ");//中心点
@@ -252,11 +327,13 @@ void SetTankShape(PTANK ptank)
 		ptank->body[4] = { ptank->core.X - 1, ptank->core.Y - 1 };
 	}
 }
-bool IsTankMeetOther(PTANK ptank,char dir)
+
+bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
+//bool IsTankMeetOther(PTANK ptank, int dir)
 {
 	switch (dir)
 	{
-	case 'w':
+	case UP:
 		//是否撞边界
 		if (ptank->core.Y <= 2)
 		{
@@ -269,8 +346,131 @@ bool IsTankMeetOther(PTANK ptank,char dir)
 		{
 			return true;
 		}
+		//是否撞敌方坦克
+		for (int i = 0; i < 3; i++)
+		{
+			if (
+				((ptank->core.X == penemytank[i].core.X) && (ptank->core.Y - penemytank[i].core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X - 1) && (ptank->core.Y - penemytank[i].core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X - 2) && (ptank->core.Y - penemytank[i].core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X + 1) && (ptank->core.Y - penemytank[i].core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X + 2) && (ptank->core.Y - penemytank[i].core.Y == 3))
+				)//要==3,而非<=，只有在挨着的时候可被当，如果小于，虽没挨着敌坦1，但距离却小于2，被2干扰
+			{
+				return true;
+			}
+		}
+		
 		break;
-	case 's':
+	case DOWN:
+		//是否撞边界
+		if (ptank->core.Y >= MAP_Y - 3)
+		{
+			return true;
+		}
+		//是否撞障碍物
+		if (g_Bar[ptank->core.X][ptank->core.Y + 2] == 1 ||
+			g_Bar[ptank->core.X - 1][ptank->core.Y + 2] == 1 ||
+			g_Bar[ptank->core.X + 1][ptank->core.Y + 2] == 1)
+		{
+			return true;
+		}
+		//是否撞敌方坦克
+		for (int i = 0; i < 3; i++)
+		{
+			if (
+				((ptank->core.X == penemytank[i].core.X) && (penemytank[i].core.Y - ptank->core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X - 1) && (penemytank[i].core.Y - ptank->core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X - 2) && (penemytank[i].core.Y - ptank->core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X + 1) && (penemytank[i].core.Y - ptank->core.Y == 3)) ||
+				((ptank->core.X == penemytank[i].core.X + 2) && (penemytank[i].core.Y - ptank->core.Y == 3))
+				)
+			{
+				return true;
+			}
+		}
+		break;
+	case LEFT:
+		//是否撞边界
+		if (ptank->core.X <= 2)
+		{
+			return true;
+		}
+		//是否撞障碍物
+		if (g_Bar[ptank->core.X-2][ptank->core.Y] == 1 ||
+			g_Bar[ptank->core.X - 2][ptank->core.Y -1] == 1 ||
+			g_Bar[ptank->core.X -2][ptank->core.Y + 1] == 1)
+		{
+			return true;
+		}
+		//是否撞敌方坦克
+		for (int i = 0; i < 3; i++)
+		{
+			if (
+				((ptank->core.Y == penemytank[i].core.Y) && (ptank->core.X - penemytank[i].core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y - 1) && (ptank->core.X - penemytank[i].core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y - 2) && (ptank->core.X - penemytank[i].core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y + 1) && (ptank->core.X - penemytank[i].core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y + 2) && (ptank->core.X - penemytank[i].core.X == 3))
+				)
+			{
+				return true;
+			}
+		}
+		break;
+	case RIGHT:
+		//是否撞边界
+		if (ptank->core.X >= MAP_X_WALL / 2 - 2)
+		{
+			return true;
+		}
+		//是否撞障碍物
+		if (g_Bar[ptank->core.X + 2][ptank->core.Y] == 1 ||
+			g_Bar[ptank->core.X + 2][ptank->core.Y - 1] == 1 ||
+			g_Bar[ptank->core.X + 2][ptank->core.Y + 1] == 1)
+		{
+			return true;
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			if (
+				((ptank->core.Y == penemytank[i].core.Y) && (penemytank[i].core.X - ptank->core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y - 1) && (penemytank[i].core.X - ptank->core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y - 2) && (penemytank[i].core.X - ptank->core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y + 1) && (penemytank[i].core.X - ptank->core.X == 3)) ||
+				((ptank->core.Y == penemytank[i].core.Y + 2) && (penemytank[i].core.X - ptank->core.X == 3))
+				)
+			{
+				return true;
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
+}
+bool IsTankMeetOther2(PTANK ptank, int dir)
+{
+	switch (dir)
+	{
+	case UP:
+		//是否撞边界
+		if (ptank->core.Y <= 2)
+		{
+			return true;
+		}
+		//是否撞障碍物
+		if (g_Bar[ptank->core.X][ptank->core.Y - 2] == 1 ||
+			g_Bar[ptank->core.X - 1][ptank->core.Y - 2] == 1 ||
+			g_Bar[ptank->core.X + 1][ptank->core.Y - 2] == 1)
+		{
+			return true;
+		}
+		//是否撞敌方坦克
+		//if
+		break;
+	case DOWN:
 		//是否撞边界
 		if (ptank->core.Y >= MAP_Y - 3)
 		{
@@ -284,21 +484,21 @@ bool IsTankMeetOther(PTANK ptank,char dir)
 			return true;
 		}
 		break;
-	case 'a':
+	case LEFT:
 		//是否撞边界
 		if (ptank->core.X <= 2)
 		{
 			return true;
 		}
 		//是否撞障碍物
-		if (g_Bar[ptank->core.X-2][ptank->core.Y] == 1 ||
-			g_Bar[ptank->core.X - 2][ptank->core.Y -1] == 1 ||
-			g_Bar[ptank->core.X -2][ptank->core.Y + 1] == 1)
+		if (g_Bar[ptank->core.X - 2][ptank->core.Y] == 1 ||
+			g_Bar[ptank->core.X - 2][ptank->core.Y - 1] == 1 ||
+			g_Bar[ptank->core.X - 2][ptank->core.Y + 1] == 1)
 		{
 			return true;
 		}
 		break;
-	case 'd':
+	case RIGHT:
 		//是否撞边界
 		if (ptank->core.X >= MAP_X_WALL / 2 - 2)
 		{
@@ -317,6 +517,10 @@ bool IsTankMeetOther(PTANK ptank,char dir)
 	}
 	return false;
 }
+
+
+
+
 
 //子弹相关
 void MoveBullet(PBULLET pbullet)
