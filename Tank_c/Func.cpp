@@ -115,7 +115,6 @@ void SelectAction()
 
 //坦克相关
 void ManipulateTank(PTANK ptank,int who, PTANK penemytank)
-//void ManipulateTank(PTANK ptank, int who)
 {
 	if (who == 我方坦克)
 	{
@@ -182,7 +181,7 @@ void ManipulateTank(PTANK ptank,int who, PTANK penemytank)
 		}
 	}*/
 
-	SetTankShape(ptank,who);//每次移动后都要重新设置形态
+	SetTankShape(ptank);//每次移动后都要重新设置形态
 }
 void ManipulateTank2(PTANK ptank, int who,PTANK pmytank, PTANK penemytank)
 {
@@ -250,15 +249,15 @@ void ManipulateTank2(PTANK ptank, int who,PTANK pmytank, PTANK penemytank)
 			break;
 		}
 	}
-	SetTankShape(ptank,who);//每次移动后都要重新设置形态
+	SetTankShape(ptank);//每次移动后都要重新设置形态
 }
 void CleanTankTail(COORD oldCore,PCOORD oldBody)
 {
-	g_MAP[oldCore.X][oldCore.Y] = 空地;
+	//g_MAP[oldCore.X][oldCore.Y] = 空地;//here
 	GotoxyAndPrint(oldCore.X, oldCore.Y, "  ");//中心点
 	for (int i = 0; i < 5; i++)//其他点
 	{
-		g_MAP[oldBody[i].X][oldBody[i].Y] = 空地;
+		//g_MAP[oldBody[i].X][oldBody[i].Y] = 空地;
 		GotoxyAndPrint(oldBody[i].X, oldBody[i].Y, "  ");
 	}
 }
@@ -267,38 +266,29 @@ void DrawTank(PTANK ptank,int who)
 	if (who == 我方坦克)
 	{
 		setColor(10, 0);
-		GotoxyAndPrint(ptank->core.X, ptank->core.Y, "■");//中心点
+		//if(g_MAP[ptank->core.X][ptank->core.Y] == 我方坦克)//加此限制
+			GotoxyAndPrint(ptank->core.X, ptank->core.Y, "■");//中心点
 		for (int i = 0; i < 5; i++)//其他点
 		{
-			GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "■");
+			//if (g_MAP[ptank->body[i].X][ptank->body[i].Y] == 我方坦克)
+				GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "■");
 		}
 		setColor(7, 0);
 	}
 	else if (who == 敌方坦克)
 	{
 		setColor(10, 0);
-		GotoxyAndPrint(ptank->core.X, ptank->core.Y, "□");//中心点
+		//if (g_MAP[ptank->core.X][ptank->core.Y] == 敌方坦克)
+			GotoxyAndPrint(ptank->core.X, ptank->core.Y, "□");//中心点
 		for (int i = 0; i < 5; i++)//其他点
 		{
-			GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "□");
+			//if (g_MAP[ptank->body[i].X][ptank->body[i].Y] == 敌方坦克)
+				GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "□");
 		}
 		setColor(7, 0);
 	}
-
-	//setColor(10, 0);
-	//for (int x = 0; x < MAP_X_WALL; x++)
-	//{
-	//	for (int y = 0; y < MAP_Y; y++)
-	//	{
-	//		if (g_MAP[x][y] == 我方坦克)
-	//			GotoxyAndPrint(x, y, "■");
-	//		else if (g_MAP[x][y] == 敌方坦克)
-	//			GotoxyAndPrint(x, y, "□");
-	//	}
-	//}
-	//setColor(7, 0);
 }
-void SetTankShape(PTANK ptank,int who)
+void SetTankShape(PTANK ptank)
 {
 	if (ptank->dir == UP)
 	{
@@ -333,14 +323,20 @@ void SetTankShape(PTANK ptank,int who)
 		ptank->body[4] = { ptank->core.X - 1, ptank->core.Y - 1 };
 	}
 	
-	//将位置信息保存到地图
-	for (int i = 0; i < 5; i++)
-	{
-		if(who == 我方坦克)
-			g_MAP[ptank->body[i].X][ptank->body[i].Y] = 我方坦克;
-		else if(who == 敌方坦克)
-			g_MAP[ptank->body[i].X][ptank->body[i].Y] = 敌方坦克;
-	}
+	////将位置信息保存到地图
+	//if (who == 我方坦克)
+	//{
+	//	g_MAP[ptank->core.X][ptank->core.Y] = 我方坦克;
+	//	for (int i = 0; i < 5; i++)
+	//		g_MAP[ptank->body[i].X][ptank->body[i].Y] = 我方坦克;
+	//}
+	//else if (who == 敌方坦克)
+	//{
+	//	g_MAP[ptank->core.X][ptank->core.Y] = 敌方坦克;
+	//	for (int i = 0; i < 5; i++)
+	//		g_MAP[ptank->body[i].X][ptank->body[i].Y] = 敌方坦克;
+	//}
+
 }
 bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 //bool IsTankMeetOther(PTANK ptank, int dir)
@@ -710,6 +706,12 @@ void IsBulMeetOther(PBULLET pbullet)
 		g_isBulExist = 0;
 		g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
 	}
+	////是否遇到敌方坦克
+	//if (g_MAP[pbullet->core.X][pbullet->core.Y] == 敌方坦克)
+	//{
+	//	g_isBulExist = 0;
+	//	g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
+	//}
 }
 
 //障碍物相关

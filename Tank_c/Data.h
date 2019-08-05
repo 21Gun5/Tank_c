@@ -5,14 +5,18 @@
 #define MAP_X 90		//右边界
 #define MAP_Y 30		//下边界
 #define MAP_X_WALL 60	//右边界
+
 #define 开始游戏 1
 #define 退出游戏 2
+
+#define 我方坦克 0
+#define 敌方坦克 1
 
 #define 空地 0
 #define 地图边界 1
 #define 障碍物 2
-#define 我方坦克 3
-#define 敌方坦克 4
+
+
 
 
 

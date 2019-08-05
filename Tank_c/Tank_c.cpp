@@ -13,8 +13,7 @@ int main()
 
 	//我方坦克
 	TANK tank = { {MAP_X_WALL / 4, MAP_Y / 2}, {0},UP };
-	g_MAP[tank.core.X][tank.core.Y] = 我方坦克;
-	SetTankShape(&tank,我方坦克);//设置我方坦克形态
+	SetTankShape(&tank);//设置我方坦克形态
 
 	//敌方坦克
 	TANK enemyTank[3] = {
@@ -22,12 +21,8 @@ int main()
 		{{MAP_X_WALL / 4, 2}, {0},DOWN },
 		{{MAP_X_WALL/2 -2, 2}, {0},DOWN }
 	};
-	g_MAP[2][2] = 敌方坦克;
-	g_MAP[MAP_X_WALL / 4][2] = 敌方坦克;
-	g_MAP[MAP_X_WALL / 2 - 2][2] = 敌方坦克;
-	for (int i = 0; i < 3; i++) {SetTankShape(&enemyTank[i],敌方坦克);}//设置敌方坦克形态
+	for (int i = 0; i < 3; i++) {SetTankShape(&enemyTank[i]);}//设置敌方坦克形态
 
-	
 	//子弹创建
 	BULLET bullet = {{0},UP};
 
