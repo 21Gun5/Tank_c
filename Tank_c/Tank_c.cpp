@@ -26,12 +26,12 @@ int main()
 		{{MAP_X_WALL / 4, 2}, {0},UP,1,true,{{0},UP,不存在} },
 		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,1,true,{{0},UP,不存在} },
 
-		//{{2,  MAP_Y / 2}, {0},UP ,1,true,{{0},UP,不存在}},
-		//{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,{{0},UP,不存在} },
+		{{2,  MAP_Y / 2}, {0},UP ,1,true,{{0},UP,不存在}},
+		{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,{{0},UP,不存在} },
 
-		//{{2,  MAP_Y - 3}, {0},UP ,1,true,{{0},UP,不存在}},
-		//{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,{{0},UP,不存在} },
-		//{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,{{0},UP,不存在} }
+		{{2,  MAP_Y - 3}, {0},UP ,1,true,{{0},UP,不存在}},
+		{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,{{0},UP,不存在} },
+		{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,{{0},UP,不存在} }
 	};
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) {SetTankShape(&enemyTank[i]);}//设置形态
 
@@ -40,14 +40,17 @@ int main()
 	DrawWelcome();
 	SelectAction();
 	DrawMapBorder();
+	DrawGameHelp();
 	BarrierInit();
 	DrawBarr();
 
 	//主循环
 	while (g_isRunning)
 	{
+		//信息实时显示
 		DrawGameInfo(&tank, enemyTank);
-		//我方坦克移动线程
+
+		//我方坦克线程
 		if (clock() - time4Tank >= 100)
 		{
 			time4Tank = clock();
@@ -57,9 +60,15 @@ int main()
 			ManipulateTank(&tank, 我方坦克, enemyTank);
 			CleanTankTail(oldCore, oldBody);
 			DrawTank(&tank,我方坦克);
+			//是否存活
+			if (tank.blood == 0)
+			{
+				GameOver(enemyTank);
+				break;
+			}
 		}
 
-		//我方子弹移动线程
+		//我方子弹线程
 		if (clock() - time4Bullet >= 50)
 		{
 			if (tank.bullet.state != 不存在)
@@ -82,7 +91,7 @@ int main()
 			}
 		}
 
-		//敌方坦克移动线程
+		//敌方坦克线程
 		if (clock() - time4EnemyTank >= 100)
 		{
 			for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
@@ -96,7 +105,7 @@ int main()
 			}
 		}
 
-		//敌方子弹移动线程
+		//敌方子弹线程
 		if (clock() - time4EnemyBullet >= 50)
 		{
 			for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
@@ -120,5 +129,9 @@ int main()
 			}
 		}
 	}
+
+	// 消耗多余字符
+	char ch = _getch();
+	ch = _getch();
 	return 0;
 }

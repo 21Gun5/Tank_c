@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <time.h>
+#pragma comment(lib,"winmm.lib")
 
 //系统功能
 void GotoxyAndPrint(unsigned x, unsigned y, const char* str)
@@ -29,6 +30,18 @@ void setColor(unsigned short ForeColor, unsigned short BackGroundColor)
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);					//获取当前窗口句柄
 	SetConsoleTextAttribute(handle, ForeColor + BackGroundColor * 0x10);//设置颜色
 }
+void PlayBGM()
+{
+	/*
+	1. 播放背景音乐（可循环)
+	2. 打开游戏播放，蛇死亡停止
+	3. 暂停时停止，恢复时播放
+	*/
+
+	// 打开音频文件（死亡时关闭
+	mciSendString("open conf/BGM.mp3 alias bgm", NULL, 0, NULL);//别名不可大写
+	mciSendString("play bgm repeat", NULL, 0, NULL);			// 循环播放,适用于.mp3格式
+}
 
 //游戏相关
 void GameInit()
@@ -41,7 +54,7 @@ void GameInit()
 			//地图边界
 			if (x == 0 || x == MAP_X/2-1 || x == MAP_X_WALL/2 ||	//三竖边
 				y == 0 || y == MAP_Y - 1 ||							//两横边
-				(x > MAP_X_WALL && y == MAP_Y / 2))					//帮助信息与游戏信息分割线
+				(x > MAP_X_WALL/2 && y == MAP_Y / 2))					//帮助信息与游戏信息分割线
 			{
 				g_MAP[x][y] = 地图边界;
 			}
@@ -56,6 +69,36 @@ void GameInit()
 
 	//初始化随机数种子
 	srand((unsigned int)time(0));
+
+	//播放背景音乐
+	//PlayBGM();
+}
+void GameOver(PTANK penemytank)
+{
+	/*
+	1. 游戏结束后的扫尾工作
+	2. 关闭bgm文件
+	3. 游戏结束的提示信息及最终分数
+	*/
+
+	//存活敌坦数量
+	int eneTankCount = 0;
+	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
+	{
+		if (penemytank[i].isAlive)
+			eneTankCount++;
+	}
+
+	//关闭音乐文件
+	mciSendString("close bgm", NULL, 0, NULL);	//close关闭而非stop停止
+
+	//提示信息
+	setColor(12, 0);
+	GotoxyAndPrint(MAP_X_WALL / 4 -2, MAP_Y / 2 - 5, "GAME OVER! ");
+	GotoxyAndPrint(MAP_X_WALL / 4 -2, MAP_Y / 2 - 3,"");
+	printf("Scores: %d", ENEMY_TANK_AMOUNT-eneTankCount);
+	setColor(7, 0);
+
 }
 void DrawMapBorder()
 {
@@ -114,18 +157,31 @@ void SelectAction()
 }
 void DrawGameInfo(PTANK ptank, PTANK penemytank)
 {
+	//存活敌坦数量
+	int eneTankCount = 0;
+	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
+	{
+		if (penemytank[i].isAlive)
+			eneTankCount++;
+	}
+	//游戏信息打印
 	setColor(12, 0);
 	GotoxyAndPrint(MAP_X/2 - 11, 5, "");
 	printf("当前生命: %d", ptank->blood);
+	GotoxyAndPrint(MAP_X / 2 - 11, 7, "");
+	printf("当前分数: %d", ENEMY_TANK_AMOUNT-eneTankCount);
+	GotoxyAndPrint(MAP_X/2 - 11, 9, "");
+	printf("敌坦个数: %d", eneTankCount);
 	setColor(7, 0);
-	//cout << "当前分数: " << setw(2) << (score - 3) * 5 << endl;
-	//GotoxyAndPrint(MAP_X - 22, 7);
-	//cout << "当前生命: " << setw(2) << blood << endl;
-	//GotoxyAndPrint(MAP_X/2 - 11, 7,"");
-
-	//cout << "敌坦个数: " << setw(2) << barrSize << endl;
-	//GotoxyAndPrint(MAP_X - 22, 11);
-
+}
+void DrawGameHelp()
+{
+	setColor(12, 0);
+	GotoxyAndPrint(MAP_X / 2 - 10, 18, "操作说明");
+	GotoxyAndPrint(MAP_X / 2 - 11, 20, "W: 上  S: 下");
+	GotoxyAndPrint(MAP_X / 2 - 11, 22, "A: 左  D: 右");
+	GotoxyAndPrint(MAP_X / 2 - 11, 24, "空格: 开火");
+	setColor(7, 0);
 }
 
 //坦克相关

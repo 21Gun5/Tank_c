@@ -5,13 +5,17 @@
 void SetCursorState(bool b);//设置光标状态
 void GotoxyAndPrint(unsigned x, unsigned y,const char * str);//光标到指定位置
 void setColor(unsigned short ForeColor, unsigned short BackGroundColor);//设置颜色
+void PlayBGM();//播放BGM/音效
 
 //游戏相关
 void GameInit();//初始化工作
+void GameOver(PTANK penemytank);//善后工作
 void DrawWelcome();//欢迎界面
 void SelectAction();//开始/退出游戏
 void DrawMapBorder();//打印地图边界
+void DrawGameHelp();//打印帮助信息
 void DrawGameInfo(PTANK ptank, PTANK penemytank);//打印游戏信息
+
 
 //坦克相关
 void DrawTank(PTANK ptank,int who);//打印坦克
