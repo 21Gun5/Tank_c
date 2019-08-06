@@ -25,7 +25,7 @@ bool IsTankMeetOther2(PTANK ptank, int dir, PTANK pmytank, PTANK penemytank);//Ê
 void MoveBullet(PBULLET pbullet);//ÒÆ¶¯×Óµ¯
 void CleanBullet(COORD oldBulCore);//ÇåÀí¾É×Óµ¯£¨»­Ç°±Ø×ö
 void DrawBullet(PBULLET pbullet);//»­×Óµ¯
-void IsBulMeetOther(PBULLET pbullet);//¼ì²â×Óµ¯ÊÇ·ñÅöµ½ÕÏ°­¶øÏûÊ§
+void IsBulMeetOther(PBULLET pbullet, PTANK penemytank);//¼ì²â×Óµ¯ÊÇ·ñÅöµ½ÕÏ°­¶øÏûÊ§
 //void IsBulMeetOther(PBULLET pbullet);//×Óµ¯´òÕÏ°­/µĞÌ¹¿Ë
 
 //ÕÏ°­ÎïÏà¹Ø
