@@ -6,21 +6,30 @@
 #define MAP_Y 30		//下边界
 #define MAP_X_WALL 60	//右边界
 
-#define ENEMY_TANK_AMOUNT 8
+#define ENEMY_TANK_AMOUNT 3
 
+//提示信息
 #define 开始游戏 1
 #define 退出游戏 2
+#define 系统默认 1
+#define 自定义 2
+#define 新建地图 1
+#define 已有地图 2
 
 #define 我方坦克 0
 #define 敌方坦克 1
 
+//地图状态
 #define 空地 0
 #define 地图边界 1
 #define 障碍物 2
 
+//子弹状态
 #define 不存在 0
 #define 未赋值 1
 #define 已赋值 2
+
+
 
 //全局变量
 extern int g_MAP[MAP_X][MAP_Y];	//地图数组

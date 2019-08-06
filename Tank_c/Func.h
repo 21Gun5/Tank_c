@@ -10,12 +10,19 @@ void PlayBGM();//播放BGM/音效
 //游戏相关
 void GameInit();//初始化工作
 void GameOver(PTANK penemytank);//善后工作
+
 void DrawWelcome();//欢迎界面
-void SelectAction();//开始/退出游戏
 void DrawMapBorder();//打印地图边界
 void DrawGameHelp();//打印帮助信息
 void DrawGameInfo(PTANK ptank, PTANK penemytank);//打印游戏信息
 
+int SelectAction();//开始/退出游戏
+int SelectWhoMap();//选择系统地图or自定义地图
+int SelectWhenMap();//新绘制or老地图
+
+int GetLiveEnemyAmount(PTANK penemytank);
+
+void SetMap();
 
 //坦克相关
 void DrawTank(PTANK ptank,int who);//打印坦克

@@ -54,12 +54,30 @@ void GameInit()
 			//地图边界
 			if (x == 0 || x == MAP_X/2-1 || x == MAP_X_WALL/2 ||	//三竖边
 				y == 0 || y == MAP_Y - 1 ||							//两横边
-				(x > MAP_X_WALL/2 && y == MAP_Y / 2))					//帮助信息与游戏信息分割线
+				(x > MAP_X_WALL/2 && y == MAP_Y / 2))				//帮助信息与游戏信息分割线
 			{
 				g_MAP[x][y] = 地图边界;
 			}
 		}
 	}
+
+	//设置障碍物
+	/*for (int x = 0; x < MAP_X_WALL; x++)
+	{
+		for (int y = 0; y < MAP_Y; y++)
+		{
+			if (
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 4) ||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 4) ||
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 4) ||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 4)
+				)
+			{
+				g_MAP[x][y] = 障碍物;
+			}
+
+		}
+	}*/
 
 	//隐藏光标
 	SetCursorState(false);
@@ -75,31 +93,27 @@ void GameInit()
 }
 void GameOver(PTANK penemytank)
 {
-	/*
-	1. 游戏结束后的扫尾工作
-	2. 关闭bgm文件
-	3. 游戏结束的提示信息及最终分数
-	*/
-
 	//存活敌坦数量
-	int eneTankCount = 0;
-	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
-	{
-		if (penemytank[i].isAlive)
-			eneTankCount++;
-	}
+	int eneTankCount = GetLiveEnemyAmount(penemytank);
 
 	//关闭音乐文件
-	mciSendString("close bgm", NULL, 0, NULL);	//close关闭而非stop停止
+	//mciSendString("close bgm", NULL, 0, NULL);	//close关闭而非stop停止
 
 	//提示信息
 	setColor(12, 0);
-	GotoxyAndPrint(MAP_X_WALL / 4 -2, MAP_Y / 2 - 5, "GAME OVER! ");
+	GotoxyAndPrint(MAP_X_WALL / 4 - 2, MAP_Y / 2 - 7, "GAME OVER! ");
+
+	if (eneTankCount == 0)
+		GotoxyAndPrint(MAP_X_WALL / 4 - 2, MAP_Y / 2 - 5, "A Winner!");
+	else
+		GotoxyAndPrint(MAP_X_WALL / 4 - 2, MAP_Y / 2 - 5, "A Loser!");
 	GotoxyAndPrint(MAP_X_WALL / 4 -2, MAP_Y / 2 - 3,"");
+
 	printf("Scores: %d", ENEMY_TANK_AMOUNT-eneTankCount);
 	setColor(7, 0);
 
 }
+
 void DrawMapBorder()
 {
 	system("cls");						//换页则清屏
@@ -111,29 +125,60 @@ void DrawMapBorder()
 			{
 				GotoxyAndPrint(x, y, "■");
 			}
+			//else if (g_MAP[x][y] == 障碍物)
+			//{
+			//	GotoxyAndPrint(x, y, "■");
+			//}
 		}
 	}
 }
 void DrawWelcome()
 {
 	//打印图案
-	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2-10, "Welcome!");
-	//printf("Welcome!");
-
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2-10, "Welcome!");
 	//提示信息
-	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 - 6, "1. 新游戏\n");
-	//printf("1. 新游戏\n");
-	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 - 4, "2. 退出游戏\n");
-	//printf("2. 退出游戏\n");
-	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 - 2, "请输入选择-> ");
-	//printf( "请输入选择-> ");
-	SetCursorState(true);			//用户输入时，光标可见
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "1. 新游戏\n");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "2. 退出游戏\n");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "请输入选择-> ");
 }
-void SelectAction()
+void DrawGameInfo(PTANK ptank, PTANK penemytank)
 {
+	//存活敌坦数量
+	int eneTankCount = GetLiveEnemyAmount(penemytank);
+
+	//运行or暂停状态
+	setColor(12, 0);
+	GotoxyAndPrint(MAP_X / 2 - 14, 1, "RUNNING");
+	GotoxyAndPrint(MAP_X / 2 - 14, 2, "Q: 暂停游戏");
+	setColor(7, 0);
+
+	//游戏信息打印
+	setColor(12, 0);
+	GotoxyAndPrint(MAP_X / 2 - 11, 5, "");
+	printf("当前生命: %d", ptank->blood);
+	GotoxyAndPrint(MAP_X / 2 - 11, 7, "");
+	printf("当前分数: %d", ENEMY_TANK_AMOUNT - eneTankCount);
+	GotoxyAndPrint(MAP_X / 2 - 11, 9, "");
+	printf("敌坦个数: %d", eneTankCount);
+	setColor(7, 0);
+}
+void DrawGameHelp()
+{
+	setColor(12, 0);
+	GotoxyAndPrint(MAP_X / 2 - 10, 18, "操作说明");
+	GotoxyAndPrint(MAP_X / 2 - 11, 20, "W: 上  S: 下");
+	GotoxyAndPrint(MAP_X / 2 - 11, 22, "A: 左  D: 右");
+	GotoxyAndPrint(MAP_X / 2 - 11, 24, "Q:  暂停游戏");
+	GotoxyAndPrint(MAP_X / 2 - 11, 26, "空格: 开火");
 	
-	//int input = _getch() - '0';	//无回显接收；-'0'保证在0-9，而非ASCII
-	int input = 1;
+	setColor(7, 0);
+}
+
+int SelectAction()
+{
+	SetCursorState(true);			//用户输入时，光标可见
+	int input = _getch() - '0';	//无回显接收；-'0'保证在0-9，而非ASCII
+	//int input = 1;
 	SetCursorState(false);		//输入完隐藏光标
 
 	switch (input)
@@ -146,43 +191,212 @@ void SelectAction()
 	case 退出游戏:
 	{
 		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "Bye! \n");
-		//printf("Bye! \n");
 		break;
 	}
 	default:
 		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "输入错误\n");
-		//printf("输入错误\n");
 		break;
 	}
+	return input;
 }
-void DrawGameInfo(PTANK ptank, PTANK penemytank)
+int SelectWhoMap()
 {
-	//存活敌坦数量
-	int eneTankCount = 0;
+	//提示信息
+	system("cls");				//换页则清屏
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "请选择地图：");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 系统默认");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 玩家提供");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2,"请输入选择-> ");
+
+	SetCursorState(true);		//用户输入前显示光标
+	int input = _getch() - '0';	//控制其0-9，而非ASCII
+	SetCursorState(false);		//输入结束后隐藏光标
+
+	return input;
+}
+int SelectWhenMap()
+{
+	//提示信息
+	system("cls");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "地图选择");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 新建地图");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 已有地图");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2,"请输入选择-> ");
+
+	SetCursorState(true);//显示光标
+	int input = _getch() - '0';
+	SetCursorState(false);//隐藏光标
+
+	return input;
+}
+
+int GetLiveEnemyAmount(PTANK penemytank)
+{
+	int count = 0;
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
 	{
 		if (penemytank[i].isAlive)
-			eneTankCount++;
+			count++;
 	}
-	//游戏信息打印
-	setColor(12, 0);
-	GotoxyAndPrint(MAP_X/2 - 11, 5, "");
-	printf("当前生命: %d", ptank->blood);
-	GotoxyAndPrint(MAP_X / 2 - 11, 7, "");
-	printf("当前分数: %d", ENEMY_TANK_AMOUNT-eneTankCount);
-	GotoxyAndPrint(MAP_X/2 - 11, 9, "");
-	printf("敌坦个数: %d", eneTankCount);
-	setColor(7, 0);
+	return count;
 }
-void DrawGameHelp()
+
+void SetMap()
 {
+	DrawMapBorder();		//地图边界
+
+	//提示信息
 	setColor(12, 0);
-	GotoxyAndPrint(MAP_X / 2 - 10, 18, "操作说明");
-	GotoxyAndPrint(MAP_X / 2 - 11, 20, "W: 上  S: 下");
-	GotoxyAndPrint(MAP_X / 2 - 11, 22, "A: 左  D: 右");
-	GotoxyAndPrint(MAP_X / 2 - 11, 24, "空格: 开火");
+	GotoxyAndPrint(MAP_X / 2 - 12, 4, "     编辑地图");
+	GotoxyAndPrint(MAP_X / 2 - 12, 6, "左键单击：创建障碍");
+	GotoxyAndPrint(MAP_X / 2 - 12, 8, "右键单击：消除障碍");
+	GotoxyAndPrint(MAP_X / 2 - 12, 10, "界外双击：退出编辑");
 	setColor(7, 0);
+
+	//鼠标事件相关
+	HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+	INPUT_RECORD ir = {};
+	DWORD dwCount = 0;
+	SetConsoleMode(hInput, ENABLE_MOUSE_INPUT);
+
+	//捕获鼠标事件并反馈给屏幕
+	while (true)
+	{
+		ReadConsoleInput(hInput, &ir, 1, &dwCount);
+		if (ir.EventType == MOUSE_EVENT)
+		{
+			//左键绘制
+			if (ir.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;//获取按键的位置
+				if (pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y)
+				{
+					g_MAP[pos.X/2][pos.Y] = 障碍物;
+					GotoxyAndPrint(pos.X/2 , pos.Y, "■");
+				}
+			}
+			//右键消除
+			if (ir.Event.MouseEvent.dwButtonState == RIGHTMOST_BUTTON_PRESSED)
+			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;
+				if (pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y)
+				{
+					g_MAP[pos.X/2][pos.Y] = 空地;
+					GotoxyAndPrint(pos.X/2, pos.Y, "  ");
+				}
+			}
+			//双击退出
+			if (ir.Event.MouseEvent.dwEventFlags == DOUBLE_CLICK)
+			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;
+				if (!(pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y))
+				{
+					//地图外双击才退出
+					break;
+				}
+			}
+		}
+	}
+
+	////将屏幕状态存入二维数组
+	//for (int i = 0; i < MAP_X_WALL; i++)
+	//{
+	//	for (int j = 0; j < MAP_Y; j++)
+	//	{
+	//		if (g_BarrMAP[i][j] == 1)
+	//		{
+	//			/*
+	//			原来是51，避免x是奇数，故/2*2，即5/2*2=4，即得41
+	//			若直接调X=x*2的那个移动函数，则在81打印
+	//			若要得正确的41，则再/2
+	//			真他妈坑啊，藏得真深，x轴一个单位，而y轴两个单位，坑！谨记！
+	//			*/
+	//			int t = i / 2;//5/2=2
+	//			t = t * 2;//2*2=4，妙啊！！！
+	//			COORD tmp = { t / 2,j };//，因为打印的时候还要*2，故再除二
+	//			BarrTmp.push_back(tmp);
+	//			barrTmpSize++;
+	//		}
+	//	}
+	//}
+
+	////提示信息
+	//system("cls");
+	//setColor(12, 0);
+	//GotoxyAndPrint(MAP_X - 24, 12,"请输入地图名字");
+	//GotoxyAndPrint(MAP_X - 24, 14,"");
+	//char str[20];
+	//scanf_s("%s", str, 20);
+	//setColor(7, 0);
+	//char _file[] = str + ".i";				//文件名
+	//string filename = "conf\\map\\" + _file;	//带完整路径的文件
+	////数据写入文件
+	//FILE* pFile = NULL;
+	//errno_t err = fopen_s(&pFile, filename.c_str(), "wb");
+	//fwrite(&barrTmpSize, sizeof(int), 1, pFile);//写入障碍物数量
+	//for (int i = 0; i < BarrTmp.size(); i++)	//遍历写入障碍物
+	//{
+	//	fwrite(&BarrTmp[i], sizeof(COORD), 1, pFile);
+	//}
+	//fclose(pFile);
+
+	//return _file;
 }
+
+//string ShowMaps()
+//{
+//	/*
+//	1. 显示所有地图以供用户选择
+//	2. 返回选择的文件名
+//	*/
+//
+//	//遍历指定目录下文件名here
+//	string inPath = "conf/map/*.i";
+//	long handle;							//用于查找的句柄
+//	_finddata_t fileinfo;
+//	handle = _findfirst(inPath.c_str(), &fileinfo);
+//	if (handle == -1)
+//		return 0;
+//	do
+//	{
+//		g_Maps.push_back(fileinfo.name);	//将文件名加入数组
+//	} while (!_findnext(handle, &fileinfo));
+//	_findclose(handle);
+//
+//	//显示目录
+//	system("cls");
+//	Gotoxy(MAP_X / 2 - 10, MAP_Y / 2 - 8);
+//	cout << "请选择地图" << endl;
+//
+//	int i = 0;								//循环变量在for外定义
+//	for (; i < g_Maps.size(); i++)
+//	{
+//		Gotoxy(MAP_X / 2 - 10, MAP_Y / 2 - 6 + i);
+//		cout << i + 1 << ". " << g_Maps[i] << endl;
+//	}
+//	Gotoxy(MAP_X / 2 - 10, MAP_Y / 2 - 6 + i);
+//	cout << "请输入选择-> ";
+//
+//	int input = _getch() - 48;				//保证0-9而非ASCII
+//	string _file = g_Maps[input - 1];		//数字始于1，而下标始于0
+//
+//	return _file;
+//}
+//void LoadMap(CBarrier& barrier, string str)
+//{
+//	string filename = "conf\\map\\" + str;
+//
+//	COORD tmp;
+//	FILE* pFile = NULL;
+//	errno_t err = fopen_s(&pFile, filename.c_str(), "rb");
+//	fread(&barrier.m_size, sizeof(int), 1, pFile);	//读取障碍物数量
+//	for (int i = 0; i < barrier.m_size; i++)		//遍历读取障碍物
+//	{
+//		fread(&tmp, sizeof(COORD), 1, pFile);
+//		barrier.m_BarrArr.push_back(tmp);			//借用tmp变量，不可直接读入
+//	}
+//	fclose(pFile);
+//}
 
 //坦克相关
 void CleanTankTail(COORD oldCore, PCOORD oldBody)
@@ -286,12 +500,46 @@ void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
 				ptank->dir = RIGHT;
 				break;
 			case ' ':
-  				//g_isBulExist ++;
 				if(ptank->bullet.state != 已赋值)
 					ptank->bullet.state = 未赋值;//已赋值即在跑时，再开火，不可赋值为1，应该消失为0时，按键才生效
-				//pbullet->state = 未赋值;
-				//ptank->bullet.state = 未赋值;
 				break;
+			case 'q':
+			{
+				//暂停及恢复
+				//mciSendString("pause bgm", NULL, 0, NULL);	//暂停bgm
+				setColor(12, 0);
+				GotoxyAndPrint(MAP_X / 2 - 14, 1, "       ");//先把较长的running清空
+				GotoxyAndPrint(MAP_X / 2 - 14, 1, "PAUSE");
+				GotoxyAndPrint(MAP_X / 2 - 14, 2, "1. 回到游戏");
+				GotoxyAndPrint(MAP_X / 2 - 14, 3, "2. 退出游戏");
+				char tmp;
+				do
+				{
+					tmp = _getch();	//利用阻塞函数暂停游戏
+				} while (!(tmp == '1' || tmp == '2' || tmp == '3'));//只有输入123才可
+
+				switch (tmp)
+				{
+				case '1'://恢复游戏
+				{
+					//mciSendString("resume bgm", NULL, 0, NULL);//恢复bgm
+					GotoxyAndPrint(MAP_X / 2 - 14, 1, "RUNNING");
+					GotoxyAndPrint(MAP_X / 2 - 14, 2, "Q: 暂停游戏");
+					GotoxyAndPrint(MAP_X / 2 - 14, 3, "           ");
+					GotoxyAndPrint(MAP_X / 2 - 14, 4, "           ");
+					break;
+				}
+				case '2'://退出游戏
+				{
+					GameOver(penemytank);
+					g_isRunning = false;
+					break;
+				}
+				default:
+					break;
+				}
+				break;
+			}
 			default:
 				break;
 			}

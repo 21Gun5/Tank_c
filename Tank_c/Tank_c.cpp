@@ -26,22 +26,57 @@ int main()
 		{{MAP_X_WALL / 4, 2}, {0},UP,1,true,{{0},UP,不存在} },
 		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,1,true,{{0},UP,不存在} },
 
-		{{2,  MAP_Y / 2}, {0},UP ,1,true,{{0},UP,不存在}},
-		{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,{{0},UP,不存在} },
+		//{{2,  MAP_Y / 2}, {0},UP ,1,true,{{0},UP,不存在}},
+		//{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,{{0},UP,不存在} },
 
-		{{2,  MAP_Y - 3}, {0},UP ,1,true,{{0},UP,不存在}},
-		{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,{{0},UP,不存在} },
-		{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,{{0},UP,不存在} }
+		//{{2,  MAP_Y - 3}, {0},UP ,1,true,{{0},UP,不存在}},
+		//{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,{{0},UP,不存在} },
+		//{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,{{0},UP,不存在} }
 	};
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) {SetTankShape(&enemyTank[i]);}//设置形态
 
-	//基本流程
+	//初始化及欢迎界面
 	GameInit();
+	//BarrierInit();
 	DrawWelcome();
-	SelectAction();
+
+	//用户选择/整体流程
+	int action = SelectAction();
+	if (action == 开始游戏)
+	{
+		//选谁的地图
+		int whoMap = SelectWhoMap();
+		if (whoMap == 系统默认)
+		{
+			BarrierInit();
+		}
+		else if (whoMap == 自定义)
+		{
+			//选何时的地图
+			int whenMap = SelectWhenMap();
+			if (whenMap == 新建地图)
+			{
+				SetMap();//BarrierInit是默认的，这是手动设置的
+				//string _map = SetMap();
+				//pbarrier = new CBarrier;
+				//LoadMap(*pbarrier, _map);
+			}
+			else if (whenMap == 已有地图)
+			{
+				//string str = ShowMaps();
+				//pbarrier = new CBarrier;
+				//LoadMap(*pbarrier, str);
+			}
+		}
+	}
+	else if (action == 退出游戏)
+	{
+		return 0;
+	}
+
+	//地图边界及障碍物
 	DrawMapBorder();
 	DrawGameHelp();
-	BarrierInit();
 	DrawBarr();
 
 	//主循环
@@ -56,16 +91,9 @@ int main()
 			time4Tank = clock();
 			COORD oldCore = tank.core;
 			COORD oldBody[5] = { tank.body[0],tank.body[1],tank.body[2],tank.body[3],tank.body[4] };
-			//ManipulateTank(&tank,我方坦克,enemyTank,&bullet);
 			ManipulateTank(&tank, 我方坦克, enemyTank);
 			CleanTankTail(oldCore, oldBody);
 			DrawTank(&tank,我方坦克);
-			//是否存活
-			if (tank.blood == 0)
-			{
-				GameOver(enemyTank);
-				break;
-			}
 		}
 
 		//我方子弹线程
@@ -128,10 +156,16 @@ int main()
 				}
 			}
 		}
+
+		//判断游戏结束
+		if (tank.blood == 0 || GetLiveEnemyAmount(enemyTank) == 0)
+		{
+			GameOver(enemyTank);
+			break;
+		}
 	}
 
 	// 消耗多余字符
 	char ch = _getch();
-	ch = _getch();
 	return 0;
 }
