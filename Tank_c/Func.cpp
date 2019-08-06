@@ -114,8 +114,8 @@ void SelectAction()
 }
 
 //坦克相关
-void ManipulateTank(PTANK ptank,int who, PTANK penemytank,PBULLET pbullet)
-//void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
+//void ManipulateTank(PTANK ptank,int who, PTANK penemytank,PBULLET pbullet)
+void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
 {
 	if (ptank->isAlive == false) return;
 	if (who == 我方坦克)
@@ -148,8 +148,8 @@ void ManipulateTank(PTANK ptank,int who, PTANK penemytank,PBULLET pbullet)
 				break;
 			case ' ':
   				//g_isBulExist ++;
-				if(pbullet->state != 已赋值)
-					pbullet->state = 未赋值;//已赋值即在跑时，再开火，不可赋值为1，应该消失为0时，按键才生效
+				if(ptank->bullet.state != 已赋值)
+					ptank->bullet.state = 未赋值;//已赋值即在跑时，再开火，不可赋值为1，应该消失为0时，按键才生效
 				//pbullet->state = 未赋值;
 				//ptank->bullet.state = 未赋值;
 				break;
@@ -161,43 +161,43 @@ void ManipulateTank(PTANK ptank,int who, PTANK penemytank,PBULLET pbullet)
 
 	SetTankShape(ptank);//每次移动后都要重新设置形态
 }
-//void ManipulateTank2(PTANK ptank, int who,PTANK pmytank, PTANK penemytank)
-//{
-//	if (ptank->isAlive == false) return;
-//	if (who == 敌方坦克)
-//	{
-//		switch (rand() % 6)
-//		{
-//		case UP:
-//			if (!IsTankMeetOther2(ptank, UP,  pmytank,  penemytank))
-//				ptank->core.Y--;
-//			ptank->dir = UP;
-//			break;
-//		case DOWN:
-//			if (!IsTankMeetOther2(ptank, DOWN,pmytank, penemytank))
-//				ptank->core.Y++;
-//			ptank->dir = DOWN;
-//			break;
-//		case LEFT:
-//			if (!IsTankMeetOther2(ptank, LEFT,pmytank, penemytank))
-//				ptank->core.X--;
-//			ptank->dir = LEFT;
-//			break;
-//		case RIGHT:
-//			if (!IsTankMeetOther2(ptank, RIGHT, pmytank, penemytank))
-//				ptank->core.X++;
-//			ptank->dir = RIGHT;
-//			break;
-//		case 4:
-//		case 5:
-//			ptank->bullet.state = 未赋值;
-//			break;
-//		default:
-//			break;
-//		}
-//	}
-//	SetTankShape(ptank);//每次移动后都要重新设置形态
-//}
+void ManipulateTank2(PTANK ptank, int who,PTANK pmytank, PTANK penemytank)
+{
+	if (ptank->isAlive == false) return;
+	if (who == 敌方坦克)
+	{
+		switch (rand() % 5)
+		{
+		case UP:
+			if (!IsTankMeetOther2(ptank, UP,  pmytank,  penemytank))
+				ptank->core.Y--;
+			ptank->dir = UP;
+			break;
+		case DOWN:
+			if (!IsTankMeetOther2(ptank, DOWN,pmytank, penemytank))
+				ptank->core.Y++;
+			ptank->dir = DOWN;
+			break;
+		case LEFT:
+			if (!IsTankMeetOther2(ptank, LEFT,pmytank, penemytank))
+				ptank->core.X--;
+			ptank->dir = LEFT;
+			break;
+		case RIGHT:
+			if (!IsTankMeetOther2(ptank, RIGHT, pmytank, penemytank))
+				ptank->core.X++;
+			ptank->dir = RIGHT;
+			break;
+		case 4:
+			if (ptank->bullet.state != 已赋值)
+				ptank->bullet.state = 未赋值;
+			break;
+		default:
+			break;
+		}
+	}
+	SetTankShape(ptank);//每次移动后都要重新设置形态
+}
 void CleanTankTail(COORD oldCore,PCOORD oldBody)
 {
 	GotoxyAndPrint(oldCore.X, oldCore.Y, "  ");//中心点
@@ -728,90 +728,90 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 		}
 	}
 }
-//void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank)
-//{
-//	//是否遇到边界
-//	if (pbullet->core.X <= 0 ||
-//		pbullet->core.X >= MAP_X_WALL / 2 ||
-//		pbullet->core.Y <= 0 ||
-//		pbullet->core.Y >= MAP_Y - 1)
-//	{
-//		pbullet->state = 不存在;
-//	}
-//	//是否遇到障碍物
-//	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 障碍物)
-//	{
-//		pbullet->state = 不存在;
-//		g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
-//	}
-//	//是否遇其他敌方坦克
-//	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
-//	{
-//		if (penemytank[i].isAlive == false) continue;
-//		switch (pbullet->dir)
-//		{
-//		case UP:
-//			if (
-//				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
-//				)
-//			{
-//				pbullet->state = 不存在;
-//				//penemytank[i].isAlive = false;//声明为死亡
-//			}
-//			break;
-//		case DOWN:
-//			if (
-//				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
-//				)
-//			{
-//				pbullet->state = 不存在;
-//				//penemytank[i].isAlive = false;
-//			}
-//			break;
-//		case LEFT:
-//			if (
-//				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
-//				)
-//			{
-//				pbullet->state = 不存在;
-//				//penemytank[i].isAlive = false;
-//			}
-//			break;
-//		case RIGHT:
-//			if (
-//				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
-//				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
-//				)
-//			{
-//				pbullet->state = 不存在;
-//				//penemytank[i].isAlive = false;
-//			}
-//			break;
-//		default:
-//			break;
-//		}
-//	}
-//
-//}
+void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank)
+{
+	//是否遇到边界
+	if (pbullet->core.X <= 0 ||
+		pbullet->core.X >= MAP_X_WALL / 2 ||
+		pbullet->core.Y <= 0 ||
+		pbullet->core.Y >= MAP_Y - 1)
+	{
+		pbullet->state = 不存在;
+	}
+	//是否遇到障碍物
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 障碍物)
+	{
+		pbullet->state = 不存在;
+		g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
+	}
+	//是否遇其他敌方坦克
+	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
+	{
+		if (penemytank[i].isAlive == false) continue;
+		switch (pbullet->dir)
+		{
+		case UP:
+			if (
+				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
+				)
+			{
+				pbullet->state = 不存在;
+				//penemytank[i].isAlive = false;//声明为死亡
+			}
+			break;
+		case DOWN:
+			if (
+				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
+				)
+			{
+				pbullet->state = 不存在;
+				//penemytank[i].isAlive = false;
+			}
+			break;
+		case LEFT:
+			if (
+				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
+				)
+			{
+				pbullet->state = 不存在;
+				//penemytank[i].isAlive = false;
+			}
+			break;
+		case RIGHT:
+			if (
+				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
+				)
+			{
+				pbullet->state = 不存在;
+				//penemytank[i].isAlive = false;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+}
 
 //障碍物相关
 void BarrierInit()

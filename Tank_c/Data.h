@@ -6,7 +6,7 @@
 #define MAP_Y 30		//下边界
 #define MAP_X_WALL 60	//右边界
 
-#define ENEMY_TANK_AMOUNT 1
+#define ENEMY_TANK_AMOUNT 8
 
 #define 开始游戏 1
 #define 退出游戏 2
@@ -22,7 +22,6 @@
 #define 未赋值 1
 #define 已赋值 2
 
-//#define FIRE ' '
 
 
 
@@ -36,8 +35,6 @@ extern bool g_isRunning;		//游戏是否运行
 
 //方向枚举
 enum direction { UP, DOWN, LEFT, RIGHT };
-
-
 
 //子弹结构体
 typedef struct _BULLET
@@ -54,5 +51,5 @@ typedef struct _TANK
 	COORD body[5];		//其他节点
 	enum direction dir;	//方向
 	bool isAlive;		//是否存活
-	//BULLET bullet;		//子弹
+	BULLET bullet;		//子弹
 }TANK, * PTANK;
