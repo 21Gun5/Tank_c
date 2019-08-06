@@ -31,7 +31,7 @@ int main()
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) {SetTankShape(&enemyTank[i]);}//设置敌方坦克形态
 
 	//子弹创建
-	BULLET bullet = {{0},UP};
+	BULLET bullet = {{0},UP,不存在};
 
 	//基本流程
 	GameInit();
@@ -50,19 +50,21 @@ int main()
 			time4Tank = clock();
 			COORD oldCore = tank.core;
 			COORD oldBody[5] = { tank.body[0],tank.body[1],tank.body[2],tank.body[3],tank.body[4] };
-			ManipulateTank(&tank,我方坦克,enemyTank);
+			ManipulateTank(&tank,我方坦克,enemyTank,&bullet);
 			CleanTankTail(oldCore, oldBody);
 			DrawTank(&tank,我方坦克);
 		}
 
 		//我方子弹移动线程
-		if (g_isBulExist != 0)//1和2均可，只要不为0
+		//if (g_isBulExist != 0)//1和2均可，只要不为0
+		if(bullet.state != 不存在)
 		{
 			//子弹赋值
-			if (g_isBulExist == 1)//==1未赋值状态
+			if (bullet.state == 未赋值)//==1未赋值状态
 			{
 				bullet = { {tank.body[0].X, tank.body[0].Y}, tank.dir };
-				g_isBulExist++;//==2已赋值状态
+				bullet.state = 已赋值;
+				//g_isBulExist++;//==2已赋值状态
 			}
 			//子弹移动
 			if (clock() - time4Bullet >= 50)
@@ -84,7 +86,7 @@ int main()
 				time4EnemyTank = clock();
 				COORD oldCore = enemyTank[i].core;
 				COORD oldBody[5] = { enemyTank[i].body[0],enemyTank[i].body[1],enemyTank[i].body[2],enemyTank[i].body[3],enemyTank[i].body[4] };
-				//ManipulateTank2(&enemyTank[i], 敌方坦克,&tank,enemyTank);
+				ManipulateTank2(&enemyTank[i], 敌方坦克,&tank,enemyTank);
 				CleanTankTail(oldCore, oldBody);
 				DrawTank(&enemyTank[i], 敌方坦克);
 			}

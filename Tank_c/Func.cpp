@@ -114,7 +114,7 @@ void SelectAction()
 }
 
 //坦克相关
-void ManipulateTank(PTANK ptank,int who, PTANK penemytank)
+void ManipulateTank(PTANK ptank,int who, PTANK penemytank,PBULLET pbullet)
 {
 	if (ptank->isAlive == false) return;
 	if (who == 我方坦克)
@@ -146,41 +146,14 @@ void ManipulateTank(PTANK ptank,int who, PTANK penemytank)
 				ptank->dir = RIGHT;
 				break;
 			case ' ':
-				g_isBulExist++;
+				//g_isBulExist++;
+				pbullet->state = 未赋值;
 				break;
 			default:
 				break;
 			}
 		}
 	}
-	/*else if (who == 敌方坦克)
-	{
-		switch (rand() % 4)
-		{
-		case UP:
-			if (!IsTankMeetOther(ptank, UP))
-				ptank->core.Y--;
-			ptank->dir = UP;
-			break;
-		case DOWN:
-			if (!IsTankMeetOther(ptank, DOWN))
-				ptank->core.Y++;
-			ptank->dir = DOWN;
-			break;
-		case LEFT:
-			if (!IsTankMeetOther(ptank, LEFT))
-				ptank->core.X--;
-			ptank->dir = LEFT;
-			break;
-		case RIGHT:
-			if (!IsTankMeetOther(ptank, RIGHT))
-				ptank->core.X++;
-			ptank->dir = RIGHT;
-			break;
-		default:
-			break;
-		}
-	}*/
 
 	SetTankShape(ptank);//每次移动后都要重新设置形态
 }
@@ -666,12 +639,14 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 		pbullet->core.Y <= 0 ||
 		pbullet->core.Y >= MAP_Y - 1)
 	{
-		g_isBulExist = 0;
+		//g_isBulExist = 0;
+		pbullet->state = 不存在;
 	}
 	//是否遇到障碍物
 	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 障碍物)
 	{
-		g_isBulExist = 0;
+		//g_isBulExist = 0;
+		pbullet->state = 不存在;
 		g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
 	}
 	//是否遇到敌方坦克
@@ -682,12 +657,17 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 		{
 		case UP:
 			if (
-				(pbullet->core.X == penemytank[i].core.X - 1) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
-				(pbullet->core.X == penemytank[i].core.X - 0) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
-				(pbullet->core.X == penemytank[i].core.X + 1) && (pbullet->core.Y - penemytank[i].core.Y == 0)
-				)//头Y==1，左右肩膀Y==0
+				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0)||
+				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
+				)
 			{
-				g_isBulExist = 0;
+				
+				//g_isBulExist = 0;
+				pbullet->state = 不存在;
 				penemytank[i].isAlive = false;//声明为死亡
 
 				//penemytank[i].core.X = 9999;//坐标销毁，免得尸体存在于地图，造成阻挡
@@ -701,36 +681,48 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 			break;
 		case DOWN:
 			if (
-				(pbullet->core.X == penemytank[i].core.X - 1) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
-				(pbullet->core.X == penemytank[i].core.X - 0) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
-				(pbullet->core.X == penemytank[i].core.X + 1) && (pbullet->core.Y - penemytank[i].core.Y == 0)
+				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
 				)
 			{
-				g_isBulExist = 0;
+				//g_isBulExist = 0;
+				pbullet->state = 不存在;
 				penemytank[i].isAlive = false;
 				//penemytank[i].core = { (-100,-100) };//坐标销毁，免得尸体存在于地图，造成阻挡
 			}
 			break;
 		case LEFT:
 			if (
-				(pbullet->core.Y == penemytank[i].core.Y - 1) && (pbullet->core.X - penemytank[i].core.X == 0) ||
-				(pbullet->core.Y == penemytank[i].core.Y - 0) && (pbullet->core.X - penemytank[i].core.X == 0) ||
-				(pbullet->core.Y == penemytank[i].core.Y + 1) && (pbullet->core.X - penemytank[i].core.X == 0)
+				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
 				)
 			{
-				g_isBulExist = 0;
+				//g_isBulExist = 0;
+				pbullet->state = 不存在;
 				penemytank[i].isAlive = false;
 				//penemytank[i].core = { (-100,-100) };//坐标销毁，免得尸体存在于地图，造成阻挡
 			}
 			break;
 		case RIGHT:
 			if (
-				(pbullet->core.Y == penemytank[i].core.Y - 1) && (pbullet->core.X - penemytank[i].core.X == 0) ||
-				(pbullet->core.Y == penemytank[i].core.Y - 0) && (pbullet->core.X - penemytank[i].core.X == 0) ||
-				(pbullet->core.Y == penemytank[i].core.Y + 1) && (pbullet->core.X - penemytank[i].core.X == 0)
+				(pbullet->core.X == penemytank[i].core.X) && (pbullet->core.Y - penemytank[i].core.Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[0].X) && (pbullet->core.Y - penemytank[i].body[0].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[1].X) && (pbullet->core.Y - penemytank[i].body[1].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[2].X) && (pbullet->core.Y - penemytank[i].body[2].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[3].X) && (pbullet->core.Y - penemytank[i].body[3].Y == 0) ||
+				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
 				)
 			{
-				g_isBulExist = 0;
+				//g_isBulExist = 0;
+				pbullet->state = 不存在;
 				penemytank[i].isAlive = false;
 				//penemytank[i].core = { (-100,-100) };//坐标销毁，免得尸体存在于地图，造成阻挡
 			}
