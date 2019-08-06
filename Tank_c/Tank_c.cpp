@@ -15,29 +15,25 @@ int main()
 	//我方坦克
 	TANK tank = {
 		{MAP_X_WALL / 4, MAP_Y / 2},
-		{0},UP,true,
+		{0},UP,3,true,
 		{{0},UP,不存在}
 	};
 	SetTankShape(&tank);//设置形态
 
 	//敌方坦克
 	TANK enemyTank[ENEMY_TANK_AMOUNT] = {
-		{{2, 2}, {0},DOWN ,true},
-		{{MAP_X_WALL / 4, 2}, {0},UP,true },
-		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,true },
+		{{2, 2}, {0},DOWN ,1,true,{{0},UP,不存在}},
+		{{MAP_X_WALL / 4, 2}, {0},UP,1,true,{{0},UP,不存在} },
+		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,1,true,{{0},UP,不存在} },
 
-		{{2,  MAP_Y / 2}, {0},UP ,true},
-		{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,true },
+		//{{2,  MAP_Y / 2}, {0},UP ,1,true,{{0},UP,不存在}},
+		//{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,{{0},UP,不存在} },
 
-		{{2,  MAP_Y - 3}, {0},UP ,true},
-		{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,true },
-		{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,true }
+		//{{2,  MAP_Y - 3}, {0},UP ,1,true,{{0},UP,不存在}},
+		//{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,{{0},UP,不存在} },
+		//{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,{{0},UP,不存在} }
 	};
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) {SetTankShape(&enemyTank[i]);}//设置形态
-
-	//子弹创建
-	//BULLET bullet = {{0},UP,0};//结构体字段
-	//BULLET bullet = { {0},UP};//全局变量控制
 
 	//基本流程
 	GameInit();
@@ -50,6 +46,7 @@ int main()
 	//主循环
 	while (g_isRunning)
 	{
+		DrawGameInfo(&tank, enemyTank);
 		//我方坦克移动线程
 		if (clock() - time4Tank >= 100)
 		{
@@ -118,7 +115,7 @@ int main()
 					MoveBullet(&enemyTank[i].bullet);
 					CleanBullet(oldBulCore);
 					DrawBullet(&enemyTank[i].bullet);
-					IsBulMeetOther2(&enemyTank[i].bullet, enemyTank);
+					IsBulMeetOther2(&enemyTank[i].bullet, enemyTank,&tank);
 				}
 			}
 		}

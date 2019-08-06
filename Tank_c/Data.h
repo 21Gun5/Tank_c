@@ -6,7 +6,7 @@
 #define MAP_Y 30		//下边界
 #define MAP_X_WALL 60	//右边界
 
-#define ENEMY_TANK_AMOUNT 8
+#define ENEMY_TANK_AMOUNT 3
 
 #define 开始游戏 1
 #define 退出游戏 2
@@ -28,6 +28,7 @@
 //全局变量
 extern int g_MAP[MAP_X][MAP_Y];	//地图数组
 extern bool g_isRunning;		//游戏是否运行
+
 //extern int g_isBulExist;		//子弹是否还存在（没打在边界或障碍物上
 //extern int g_enemyTankAmount;	//敌坦数量
 //extern int g_Bar[MAP_X_WALL][MAP_Y];//障碍物数组
@@ -50,6 +51,7 @@ typedef struct _TANK
 	COORD core;			//中心点
 	COORD body[5];		//其他节点
 	enum direction dir;	//方向
+	unsigned blood;		//血量
 	bool isAlive;		//是否存活
 	BULLET bullet;		//子弹
 }TANK, * PTANK;
