@@ -1,10 +1,12 @@
 #include "Func.h"
 #include "Data.h"
 #include <Windows.h>
+#include <io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <time.h>
+#include <string.h>
 #pragma comment(lib,"winmm.lib")
 
 //系统功能
@@ -1334,6 +1336,94 @@ void SetBarrier(PTANK ptank, PTANK penemytank)
 			}
 		}
 	}
+
+	//提示信息
+	system("cls");
+	setColor(12, 0);
+	GotoxyAndPrint(MAP_X / 2 - 12, 12, "请输入地图名字:");
+	GotoxyAndPrint(MAP_X - 24, 14,"");
+
+	//输入文件名
+	char str[15];
+	char* filename = (char*)malloc(40);
+	SetCursorState(true);
+	scanf_s("%s", str, 15);
+	SetCursorState(false);
+	setColor(7, 0);
+	sprintf_s(filename, 40, "%s%s%s", "conf/map/", str, ".i");
+
+	//数据写入文件
+	FILE* pFile = NULL;
+	errno_t err = fopen_s(&pFile, filename, "wb");
+	for (int x = 0; x < MAP_X_WALL; x++)
+	{
+		for (int y = 0; y < MAP_Y; y++)
+		{
+			fwrite(&g_MAP[x][y], sizeof(int), 1, pFile);
+		}
+	}
+	fclose(pFile);
+
+	//return str;
+}
+void LoadMap(char * str)
+{
+
+	char* filename = (char*)malloc(40);
+	sprintf_s(filename, 40, "%s%s", "conf/map/", str);
+
+	FILE* pFile = NULL;
+	errno_t err = fopen_s(&pFile, filename, "rb");
+
+	for (int x = 0; x < MAP_X_WALL; x++)
+	{
+		for (int y = 0; y < MAP_Y; y++)
+		{
+			fread(&g_MAP[x][y], sizeof(int), 1, pFile);
+		}
+	}
+	fclose(pFile);
+}
+char* ShowMaps()
+{
+	//遍历指定目录及后缀的文件名并存入数组
+	const char* g_Maps[10] = {nullptr};
+	long Handle;
+	struct _finddata_t FileInfo;
+	int count = 0;
+	if((Handle = _findfirst("conf/map/*.i", &FileInfo)) == -1L)
+		printf("Not Found\n");
+	else
+	{
+		g_Maps[count] = FileInfo.name;
+		count++;
+		while (_findnext(Handle, &FileInfo) == 0)
+		{
+			g_Maps[count] = FileInfo.name;
+			count++;
+		}
+			
+		_findclose(Handle);
+	}
+
+	//显示地图文件
+	system("cls");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 8, "请选择地图");
+	int i= 0;								//循环变量在for外定义
+	for (; i < count; i++)
+	{
+		GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + i,"");
+		printf("%d.%s", i + 1, g_Maps[i]);
+	}
+	//选择
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + i, "请输入选择-> ");
+	SetCursorState(true);
+	int input = _getch() - '0';				//保证0-9而非ASCII
+	SetCursorState(false);
+
+	char* _file = (char *)malloc(15);
+	strcpy_s(_file, 15, g_Maps[input - 1]);//数字始于1，而下标始于0	
+	return _file;
 }
 void DrawBarr()
 {

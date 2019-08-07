@@ -48,7 +48,7 @@ int main()
 		if (whoMap == 系统默认)
 		{
 			SelectLevel();
-			BarrierInit();
+			BarrierInit();//使用默认的
 		}
 		else if (whoMap == 自定义)
 		{
@@ -56,12 +56,12 @@ int main()
 			int whenMap = SelectWhenMap();
 			if (whenMap == 新建地图)
 			{
-				SetBarrier(&tank,enemyTank);//BarrierInit是默认的，这是手动设置的
+				SetBarrier(&tank,enemyTank);//手动设置并直接使用
 			}
 			else if (whenMap == 已有地图)
 			{
-				GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "头发正在掉，敬请期待！\n");
-				return 0;
+				char* str = ShowMaps();
+				LoadMap(str);//导入已有地图
 			}
 		}
 	}
