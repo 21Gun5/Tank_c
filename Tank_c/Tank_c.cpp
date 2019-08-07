@@ -26,18 +26,17 @@ int main()
 		{{MAP_X_WALL / 4, 2}, {0},UP,2,true,敌方坦克,{{0},UP,不存在} },
 		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,1,true,敌方坦克,{{0},UP,不存在} },
 
-		//{{2,  MAP_Y / 2}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
-		//{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,{{0},UP,不存在} },
+		{{2,  MAP_Y / 2}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
+		{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} },
 
-		//{{2,  MAP_Y - 3}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
-		//{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,敌方坦克,{{0},UP,不存在} },
-		//{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} }
+		{{2,  MAP_Y - 3}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
+		{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,敌方坦克,{{0},UP,不存在} },
+		{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} }
 	};
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) {SetTankShape(&enemyTank[i]);}//设置形态
 
 	//初始化及欢迎界面
 	GameInit();
-	//BarrierInit();//改用游戏流程中调用
 	DrawWelcome();
 
 	//整体流程
@@ -56,16 +55,12 @@ int main()
 			int whenMap = SelectWhenMap();
 			if (whenMap == 新建地图)
 			{
-				SetBarrier();//BarrierInit是默认的，这是手动设置的
-				//string _map = SetMap();
-				//pbarrier = new CBarrier;
-				//LoadMap(*pbarrier, _map);
+				SetBarrier(&tank,enemyTank);//BarrierInit是默认的，这是手动设置的
 			}
 			else if (whenMap == 已有地图)
 			{
-				//string str = ShowMaps();
-				//pbarrier = new CBarrier;
-				//LoadMap(*pbarrier, str);
+				GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "头发正在掉，敬请期待！\n");
+				return 0;
 			}
 		}
 	}

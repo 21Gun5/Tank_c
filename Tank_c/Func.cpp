@@ -158,8 +158,8 @@ void DrawGameHelp()
 int SelectAction()
 {
 	SetCursorState(true);			//用户输入时，光标可见
-	//int input = _getch() - '0';		//无回显接收；-'0'保证在0-9，而非ASCII
-	int input = 1;
+	int input = _getch() - '0';		//无回显接收；-'0'保证在0-9，而非ASCII
+	//int input = 1;
 	SetCursorState(false);			//输入完隐藏光标
 
 	switch (input)
@@ -171,7 +171,7 @@ int SelectAction()
 	}
 	case 读取游戏:
 	{
-		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "敬请期待！\n");
+		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "头发正在掉，敬请期待！\n");
 		break;
 	}
 	case 退出游戏:
@@ -195,8 +195,8 @@ int SelectWhoMap()
 	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2,"请输入选择-> ");
 
 	SetCursorState(true);		//用户输入前显示光标
-	//int input = _getch() - '0';	//控制其0-9，而非ASCII
-	int input = 1;
+	int input = _getch() - '0';	//控制其0-9，而非ASCII
+	//int input = 1;
 	SetCursorState(false);		//输入结束后隐藏光标
 
 	return input;
@@ -1109,14 +1109,15 @@ void BarrierInit()
 		}
 	}
 }
-void SetBarrier()
+void SetBarrier(PTANK ptank, PTANK penemytank)
 {
 	DrawMapBorder();		//地图边界
 
 	//提示信息
 	setColor(12, 0);
-	GotoxyAndPrint(MAP_X / 2 - 12, 4, "     编辑地图");
-	GotoxyAndPrint(MAP_X / 2 - 12, 6, "左键单击：创建障碍");
+	GotoxyAndPrint(MAP_X / 2 - 12, 2, "     编辑地图");
+	GotoxyAndPrint(MAP_X / 2 - 12, 4, "左键单击：创建土块");
+	GotoxyAndPrint(MAP_X / 2 - 12, 6, "滚轮单击：创建石块");
 	GotoxyAndPrint(MAP_X / 2 - 12, 8, "右键单击：消除障碍");
 	GotoxyAndPrint(MAP_X / 2 - 12, 10, "界外双击：退出编辑");
 	setColor(7, 0);
@@ -1133,13 +1134,61 @@ void SetBarrier()
 		ReadConsoleInput(hInput, &ir, 1, &dwCount);
 		if (ir.EventType == MOUSE_EVENT)
 		{
-			//左键绘制
+			//左键绘制土块障碍
 			if (ir.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
 			{
 				COORD pos = ir.Event.MouseEvent.dwMousePosition;//获取按键的位置
-				if (pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y)
+				//不可在我方坦克处绘制
+				if (pos.X / 2 >= ptank->core.X-1 &&
+					pos.X / 2 <= ptank->core.X +1 &&
+					pos.Y >= ptank->core.Y - 1 && 
+					pos.Y <= ptank->core.Y+1) 
+					continue;
+				//不可在我方坦克绘制
+				int flag = 0;
+				for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
+				{
+					if (pos.X / 2 >= penemytank[i].core.X - 1 &&
+						pos.X / 2 <= penemytank[i].core.X + 1 &&
+						pos.Y >= penemytank[i].core.Y - 1 &&
+						pos.Y <= penemytank[i].core.Y + 1)
+						flag = 1;
+						//continue;//作用域是此for
+				}
+				if(flag==1) continue;
+				//可绘制处（除边界、坦克）
+				if (pos.X > 1 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y-1)
 				{
 					g_MAP[pos.X / 2][pos.Y] = 土块障碍物;
+					GotoxyAndPrint(pos.X / 2, pos.Y, "※");
+				}
+			}
+			//滚轮绘制石块障碍
+			if (ir.Event.MouseEvent.dwButtonState == FROM_LEFT_2ND_BUTTON_PRESSED)
+			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;//获取按键的位置
+				//不可在我方坦克处绘制
+				if (pos.X / 2 >= ptank->core.X - 1 &&
+					pos.X / 2 <= ptank->core.X + 1 &&
+					pos.Y >= ptank->core.Y - 1 &&
+					pos.Y <= ptank->core.Y + 1)
+					continue;
+				//不可在我方坦克绘制
+				int flag = 0;
+				for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
+				{
+					if (pos.X / 2 >= penemytank[i].core.X - 1 &&
+						pos.X / 2 <= penemytank[i].core.X + 1 &&
+						pos.Y >= penemytank[i].core.Y - 1 &&
+						pos.Y <= penemytank[i].core.Y + 1)
+						flag = 1;
+					//continue;//作用域是此for
+				}
+				if (flag == 1) continue;
+				//可绘制处（除边界、坦克）
+				if (pos.X > 1 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y-1)
+				{
+					g_MAP[pos.X / 2][pos.Y] = 石块障碍物;
 					GotoxyAndPrint(pos.X / 2, pos.Y, "■");
 				}
 			}
@@ -1147,7 +1196,7 @@ void SetBarrier()
 			if (ir.Event.MouseEvent.dwButtonState == RIGHTMOST_BUTTON_PRESSED)
 			{
 				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				if (pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y)
+				if (pos.X > 1 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y-1)
 				{
 					g_MAP[pos.X / 2][pos.Y] = 空地;
 					GotoxyAndPrint(pos.X / 2, pos.Y, "  ");
@@ -1157,7 +1206,7 @@ void SetBarrier()
 			if (ir.Event.MouseEvent.dwEventFlags == DOUBLE_CLICK)
 			{
 				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				if (!(pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y))
+				if (!(pos.X > 1 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y-1))
 				{
 					//地图外双击才退出
 					break;

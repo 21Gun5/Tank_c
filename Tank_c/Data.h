@@ -6,7 +6,7 @@
 #define MAP_Y 30		//下边界
 #define MAP_X_WALL 60	//右边界
 
-#define ENEMY_TANK_AMOUNT 3
+#define ENEMY_TANK_AMOUNT 8
 
 //提示信息
 #define 开始游戏 1

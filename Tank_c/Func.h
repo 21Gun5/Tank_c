@@ -41,5 +41,5 @@ void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank);
 
 //障碍物相关
 void BarrierInit();//默认障碍物地图
-void SetBarrier();//手动设置障碍
+void SetBarrier(PTANK ptank, PTANK penemytank);//手动设置障碍
 void DrawBarr();//打印障碍物
