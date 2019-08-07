@@ -32,12 +32,6 @@ void setColor(unsigned short ForeColor, unsigned short BackGroundColor)
 }
 void PlayBGM()
 {
-	/*
-	1. 播放背景音乐（可循环)
-	2. 打开游戏播放，蛇死亡停止
-	3. 暂停时停止，恢复时播放
-	*/
-
 	// 打开音频文件（死亡时关闭
 	mciSendString("open conf/BGM.mp3 alias bgm", NULL, 0, NULL);//别名不可大写
 	mciSendString("play bgm repeat", NULL, 0, NULL);			// 循环播放,适用于.mp3格式
@@ -61,24 +55,6 @@ void GameInit()
 		}
 	}
 
-	//设置障碍物
-	/*for (int x = 0; x < MAP_X_WALL; x++)
-	{
-		for (int y = 0; y < MAP_Y; y++)
-		{
-			if (
-				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 4) ||
-				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 4) ||
-				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 4) ||
-				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 4)
-				)
-			{
-				g_MAP[x][y] = 障碍物;
-			}
-
-		}
-	}*/
-
 	//隐藏光标
 	SetCursorState(false);
 
@@ -89,7 +65,7 @@ void GameInit()
 	srand((unsigned int)time(0));
 
 	//播放背景音乐
-	//PlayBGM();
+	//PlayBGM();//先不放，烦人
 }
 void GameOver(PTANK penemytank)
 {
@@ -97,7 +73,7 @@ void GameOver(PTANK penemytank)
 	int eneTankCount = GetLiveEnemyAmount(penemytank);
 
 	//关闭音乐文件
-	//mciSendString("close bgm", NULL, 0, NULL);	//close关闭而非stop停止
+	mciSendString("close bgm", NULL, 0, NULL);	//close关闭而非stop停止
 
 	//提示信息
 	setColor(12, 0);
@@ -117,6 +93,7 @@ void GameOver(PTANK penemytank)
 void DrawMapBorder()
 {
 	system("cls");						//换页则清屏
+	//setColor(8, 0);
 	for (int x = 0; x < MAP_X; x++)
 	{
 		for (int y = 0; y < MAP_Y; y++)
@@ -125,21 +102,25 @@ void DrawMapBorder()
 			{
 				GotoxyAndPrint(x, y, "■");
 			}
-			//else if (g_MAP[x][y] == 障碍物)
-			//{
-			//	GotoxyAndPrint(x, y, "■");
-			//}
 		}
 	}
+	//setColor(7, 0);
 }
 void DrawWelcome()
 {
 	//打印图案
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2-10, "Welcome!");
+	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 15, "MMP\"\"MM\"\"YMM                      `7MM      ");
+	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 14, "P'   MM   `7                        MM      ");
+	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 13, "     MM       ,6\"Yb.  `7MMpMMMb.    MM, MP'");
+	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 12, "     MM      8)   MM    MM    MM    MM ;Y   ");
+	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 11, "     MM       ,pm9MM    MM    MM    MM;Mm   ");
+	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 10, "     MM      8M   MM    MM    MM    MM `Mb. ");
+	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 9,  "   .JMML.    `Moo9^Yo..JMML  JMML..JMML. YA.");
 	//提示信息
 	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "1. 新游戏\n");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "2. 退出游戏\n");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "请输入选择-> ");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "2. 读取游戏\n");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "3. 退出游戏\n");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 0, "请输入选择-> ");
 }
 void DrawGameInfo(PTANK ptank, PTANK penemytank)
 {
@@ -177,15 +158,20 @@ void DrawGameHelp()
 int SelectAction()
 {
 	SetCursorState(true);			//用户输入时，光标可见
-	int input = _getch() - '0';	//无回显接收；-'0'保证在0-9，而非ASCII
-	//int input = 1;
-	SetCursorState(false);		//输入完隐藏光标
+	//int input = _getch() - '0';		//无回显接收；-'0'保证在0-9，而非ASCII
+	int input = 1;
+	SetCursorState(false);			//输入完隐藏光标
 
 	switch (input)
 	{
 	case 开始游戏:
 	{
 		g_isRunning = true;
+		break;
+	}
+	case 读取游戏:
+	{
+		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "敬请期待！\n");
 		break;
 	}
 	case 退出游戏:
@@ -209,7 +195,8 @@ int SelectWhoMap()
 	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2,"请输入选择-> ");
 
 	SetCursorState(true);		//用户输入前显示光标
-	int input = _getch() - '0';	//控制其0-9，而非ASCII
+	//int input = _getch() - '0';	//控制其0-9，而非ASCII
+	int input = 1;
 	SetCursorState(false);		//输入结束后隐藏光标
 
 	return input;
@@ -225,178 +212,11 @@ int SelectWhenMap()
 
 	SetCursorState(true);//显示光标
 	int input = _getch() - '0';
+	//int input = 1;
 	SetCursorState(false);//隐藏光标
 
 	return input;
 }
-
-int GetLiveEnemyAmount(PTANK penemytank)
-{
-	int count = 0;
-	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
-	{
-		if (penemytank[i].isAlive)
-			count++;
-	}
-	return count;
-}
-
-void SetMap()
-{
-	DrawMapBorder();		//地图边界
-
-	//提示信息
-	setColor(12, 0);
-	GotoxyAndPrint(MAP_X / 2 - 12, 4, "     编辑地图");
-	GotoxyAndPrint(MAP_X / 2 - 12, 6, "左键单击：创建障碍");
-	GotoxyAndPrint(MAP_X / 2 - 12, 8, "右键单击：消除障碍");
-	GotoxyAndPrint(MAP_X / 2 - 12, 10, "界外双击：退出编辑");
-	setColor(7, 0);
-
-	//鼠标事件相关
-	HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
-	INPUT_RECORD ir = {};
-	DWORD dwCount = 0;
-	SetConsoleMode(hInput, ENABLE_MOUSE_INPUT);
-
-	//捕获鼠标事件并反馈给屏幕
-	while (true)
-	{
-		ReadConsoleInput(hInput, &ir, 1, &dwCount);
-		if (ir.EventType == MOUSE_EVENT)
-		{
-			//左键绘制
-			if (ir.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-			{
-				COORD pos = ir.Event.MouseEvent.dwMousePosition;//获取按键的位置
-				if (pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y)
-				{
-					g_MAP[pos.X/2][pos.Y] = 障碍物;
-					GotoxyAndPrint(pos.X/2 , pos.Y, "■");
-				}
-			}
-			//右键消除
-			if (ir.Event.MouseEvent.dwButtonState == RIGHTMOST_BUTTON_PRESSED)
-			{
-				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				if (pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y)
-				{
-					g_MAP[pos.X/2][pos.Y] = 空地;
-					GotoxyAndPrint(pos.X/2, pos.Y, "  ");
-				}
-			}
-			//双击退出
-			if (ir.Event.MouseEvent.dwEventFlags == DOUBLE_CLICK)
-			{
-				COORD pos = ir.Event.MouseEvent.dwMousePosition;
-				if (!(pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y))
-				{
-					//地图外双击才退出
-					break;
-				}
-			}
-		}
-	}
-
-	////将屏幕状态存入二维数组
-	//for (int i = 0; i < MAP_X_WALL; i++)
-	//{
-	//	for (int j = 0; j < MAP_Y; j++)
-	//	{
-	//		if (g_BarrMAP[i][j] == 1)
-	//		{
-	//			/*
-	//			原来是51，避免x是奇数，故/2*2，即5/2*2=4，即得41
-	//			若直接调X=x*2的那个移动函数，则在81打印
-	//			若要得正确的41，则再/2
-	//			真他妈坑啊，藏得真深，x轴一个单位，而y轴两个单位，坑！谨记！
-	//			*/
-	//			int t = i / 2;//5/2=2
-	//			t = t * 2;//2*2=4，妙啊！！！
-	//			COORD tmp = { t / 2,j };//，因为打印的时候还要*2，故再除二
-	//			BarrTmp.push_back(tmp);
-	//			barrTmpSize++;
-	//		}
-	//	}
-	//}
-
-	////提示信息
-	//system("cls");
-	//setColor(12, 0);
-	//GotoxyAndPrint(MAP_X - 24, 12,"请输入地图名字");
-	//GotoxyAndPrint(MAP_X - 24, 14,"");
-	//char str[20];
-	//scanf_s("%s", str, 20);
-	//setColor(7, 0);
-	//char _file[] = str + ".i";				//文件名
-	//string filename = "conf\\map\\" + _file;	//带完整路径的文件
-	////数据写入文件
-	//FILE* pFile = NULL;
-	//errno_t err = fopen_s(&pFile, filename.c_str(), "wb");
-	//fwrite(&barrTmpSize, sizeof(int), 1, pFile);//写入障碍物数量
-	//for (int i = 0; i < BarrTmp.size(); i++)	//遍历写入障碍物
-	//{
-	//	fwrite(&BarrTmp[i], sizeof(COORD), 1, pFile);
-	//}
-	//fclose(pFile);
-
-	//return _file;
-}
-
-//string ShowMaps()
-//{
-//	/*
-//	1. 显示所有地图以供用户选择
-//	2. 返回选择的文件名
-//	*/
-//
-//	//遍历指定目录下文件名here
-//	string inPath = "conf/map/*.i";
-//	long handle;							//用于查找的句柄
-//	_finddata_t fileinfo;
-//	handle = _findfirst(inPath.c_str(), &fileinfo);
-//	if (handle == -1)
-//		return 0;
-//	do
-//	{
-//		g_Maps.push_back(fileinfo.name);	//将文件名加入数组
-//	} while (!_findnext(handle, &fileinfo));
-//	_findclose(handle);
-//
-//	//显示目录
-//	system("cls");
-//	Gotoxy(MAP_X / 2 - 10, MAP_Y / 2 - 8);
-//	cout << "请选择地图" << endl;
-//
-//	int i = 0;								//循环变量在for外定义
-//	for (; i < g_Maps.size(); i++)
-//	{
-//		Gotoxy(MAP_X / 2 - 10, MAP_Y / 2 - 6 + i);
-//		cout << i + 1 << ". " << g_Maps[i] << endl;
-//	}
-//	Gotoxy(MAP_X / 2 - 10, MAP_Y / 2 - 6 + i);
-//	cout << "请输入选择-> ";
-//
-//	int input = _getch() - 48;				//保证0-9而非ASCII
-//	string _file = g_Maps[input - 1];		//数字始于1，而下标始于0
-//
-//	return _file;
-//}
-//void LoadMap(CBarrier& barrier, string str)
-//{
-//	string filename = "conf\\map\\" + str;
-//
-//	COORD tmp;
-//	FILE* pFile = NULL;
-//	errno_t err = fopen_s(&pFile, filename.c_str(), "rb");
-//	fread(&barrier.m_size, sizeof(int), 1, pFile);	//读取障碍物数量
-//	for (int i = 0; i < barrier.m_size; i++)		//遍历读取障碍物
-//	{
-//		fread(&tmp, sizeof(COORD), 1, pFile);
-//		barrier.m_BarrArr.push_back(tmp);			//借用tmp变量，不可直接读入
-//	}
-//	fclose(pFile);
-//}
 
 //坦克相关
 void CleanTankTail(COORD oldCore, PCOORD oldBody)
@@ -422,11 +242,18 @@ void DrawTank(PTANK ptank, int who)
 	}
 	else if (who == 敌方坦克)
 	{
-		setColor(10, 0);
-		GotoxyAndPrint(ptank->core.X, ptank->core.Y, "□");//中心点
-		for (int i = 0; i < 5; i++)//其他点
+		setColor(11, 0);//亮蓝色
+		if (ptank->blood == 2)
 		{
-			GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "□");
+			GotoxyAndPrint(ptank->core.X, ptank->core.Y, "■");//中心点
+			for (int i = 0; i < 5; i++)//其他点
+				GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "■");//中心点
+		}
+		else if (ptank->blood == 1)
+		{
+			GotoxyAndPrint(ptank->core.X, ptank->core.Y, "□");//中心点
+			for (int i = 0; i < 5; i++)//其他点
+				GotoxyAndPrint(ptank->body[i].X, ptank->body[i].Y, "□");
 		}
 		setColor(7, 0);
 	}
@@ -467,6 +294,16 @@ void SetTankShape(PTANK ptank)
 		ptank->body[4] = { ptank->core.X - 1, ptank->core.Y - 1 };
 	}
 }
+int GetLiveEnemyAmount(PTANK penemytank)
+{
+	int count = 0;
+	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
+	{
+		if (penemytank[i].isAlive)
+			count++;
+	}
+	return count;
+}
 
 void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
 {
@@ -506,7 +343,7 @@ void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
 			case 'q':
 			{
 				//暂停及恢复
-				//mciSendString("pause bgm", NULL, 0, NULL);	//暂停bgm
+				mciSendString("pause bgm", NULL, 0, NULL);	//暂停bgm
 				setColor(12, 0);
 				GotoxyAndPrint(MAP_X / 2 - 14, 1, "       ");//先把较长的running清空
 				GotoxyAndPrint(MAP_X / 2 - 14, 1, "PAUSE");
@@ -516,13 +353,13 @@ void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
 				do
 				{
 					tmp = _getch();	//利用阻塞函数暂停游戏
-				} while (!(tmp == '1' || tmp == '2' || tmp == '3'));//只有输入123才可
+				} while (!(tmp == '1' || tmp == '2'));//只有输入12才可
 
 				switch (tmp)
 				{
 				case '1'://恢复游戏
 				{
-					//mciSendString("resume bgm", NULL, 0, NULL);//恢复bgm
+					mciSendString("resume bgm", NULL, 0, NULL);//恢复bgm
 					GotoxyAndPrint(MAP_X / 2 - 14, 1, "RUNNING");
 					GotoxyAndPrint(MAP_X / 2 - 14, 2, "Q: 暂停游戏");
 					GotoxyAndPrint(MAP_X / 2 - 14, 3, "           ");
@@ -596,9 +433,12 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if (g_MAP[ptank->core.X][ptank->core.Y - 2] == 障碍物||
-			g_MAP[ptank->core.X-1][ptank->core.Y - 2] == 障碍物 ||
-			g_MAP[ptank->core.X+1][ptank->core.Y - 2] == 障碍物)
+		if ((g_MAP[ptank->core.X][ptank->core.Y - 2] == 土块障碍物||
+			g_MAP[ptank->core.X-1][ptank->core.Y - 2] == 土块障碍物 ||
+			g_MAP[ptank->core.X+1][ptank->core.Y - 2] == 土块障碍物) ||
+			(g_MAP[ptank->core.X][ptank->core.Y - 2] == 石块障碍物 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 石块障碍物 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 石块障碍物))
 		{
 			return true;
 		}
@@ -626,9 +466,12 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if (g_MAP[ptank->core.X][ptank->core.Y + 2] == 障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 障碍物)
+		if ((g_MAP[ptank->core.X][ptank->core.Y + 2] == 土块障碍物 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 土块障碍物 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 土块障碍物) ||
+			(g_MAP[ptank->core.X][ptank->core.Y + 2] == 石块障碍物 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 石块障碍物 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 石块障碍物))
 		{
 			return true;
 		}
@@ -655,9 +498,12 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if (g_MAP[ptank->core.X-2][ptank->core.Y] == 障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y -1] == 障碍物 ||
-			g_MAP[ptank->core.X -2][ptank->core.Y + 1] == 障碍物)
+		if ((g_MAP[ptank->core.X-2][ptank->core.Y] == 土块障碍物 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y -1] == 土块障碍物 ||
+			g_MAP[ptank->core.X -2][ptank->core.Y + 1] == 土块障碍物)||
+			(g_MAP[ptank->core.X - 2][ptank->core.Y] == 石块障碍物 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 石块障碍物 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 石块障碍物))
 		{
 			return true;
 		}
@@ -684,9 +530,12 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if (g_MAP[ptank->core.X + 2][ptank->core.Y] == 障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 障碍物)
+		if ((g_MAP[ptank->core.X + 2][ptank->core.Y] == 土块障碍物 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 土块障碍物 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 土块障碍物) ||
+			(g_MAP[ptank->core.X + 2][ptank->core.Y] == 石块障碍物 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 石块障碍物 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 石块障碍物))
 		{
 			return true;
 		}
@@ -722,9 +571,12 @@ bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if (g_MAP[ptank->core.X][ptank->core.Y - 2] == 障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 障碍物)
+		if ((g_MAP[ptank->core.X][ptank->core.Y - 2] == 土块障碍物 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 土块障碍物 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 土块障碍物) ||
+			(g_MAP[ptank->core.X][ptank->core.Y - 2] == 石块障碍物 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 石块障碍物 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 石块障碍物))
 		{
 			return true;
 		}
@@ -764,9 +616,12 @@ bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if (g_MAP[ptank->core.X][ptank->core.Y + 2] == 障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 障碍物)
+		if ((g_MAP[ptank->core.X][ptank->core.Y + 2] == 土块障碍物 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 土块障碍物 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 土块障碍物) ||
+			(g_MAP[ptank->core.X][ptank->core.Y + 2] == 石块障碍物 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 石块障碍物 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 石块障碍物))
 		{
 			return true;
 		}
@@ -805,9 +660,12 @@ bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if (g_MAP[ptank->core.X - 2][ptank->core.Y] == 障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 障碍物)
+		if ((g_MAP[ptank->core.X - 2][ptank->core.Y] == 土块障碍物 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 土块障碍物 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 土块障碍物) ||
+			(g_MAP[ptank->core.X - 2][ptank->core.Y] == 石块障碍物 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 石块障碍物 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 石块障碍物))
 		{
 			return true;
 		}
@@ -846,9 +704,12 @@ bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if (g_MAP[ptank->core.X + 2][ptank->core.Y] == 障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 障碍物)
+		if ((g_MAP[ptank->core.X + 2][ptank->core.Y] == 土块障碍物 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 土块障碍物 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 土块障碍物) ||
+			(g_MAP[ptank->core.X + 2][ptank->core.Y] == 石块障碍物 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 石块障碍物 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 石块障碍物))
 		{
 			return true;
 		}
@@ -915,7 +776,7 @@ void CleanBullet(COORD oldBulCore)
 	GotoxyAndPrint(oldBulCore.X, oldBulCore.Y, "  ");
 	//printf("  ");
 }
-void DrawBullet(PBULLET pbullet)
+void DrawBullet(PBULLET pbullet,PTANK ptank)
 {
 	//碰到边界，换成边界的颜色，实现子弹消失的效果
 	if (pbullet->core.X <= 0 ||
@@ -927,14 +788,23 @@ void DrawBullet(PBULLET pbullet)
 	}
 	else
 	{
-		setColor(12, 0);
+		if(ptank->who == 我方坦克)
+			setColor(10, 0);
+		else if(ptank->who == 敌方坦克)
+			setColor(11, 0);
 	}
 
 	//碰到障碍，将子弹画为空格，实现子弹消失
-	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 障碍物)
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍物)
 	{
 		GotoxyAndPrint(pbullet->core.X, pbullet->core.Y, "  ");
 	}
+	//碰到石块障碍物，换成其颜色，实现子弹消失的效果
+	else if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍物)
+	{
+		setColor(7, 0);
+	}
+	//一般运动状态
 	else
 	{
 		GotoxyAndPrint(pbullet->core.X, pbullet->core.Y, "■");
@@ -950,13 +820,21 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 		pbullet->core.Y <= 0 ||
 		pbullet->core.Y >= MAP_Y - 1)
 	{
+		//PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 		pbullet->state = 不存在;
 	}
-	//是否遇到障碍物
-	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 障碍物)
+	//是否遇到土块障碍物
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍物)
 	{
+		//PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 		pbullet->state = 不存在;
 		g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
+	}
+	//是否遇到石块障碍物
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍物)
+	{
+		pbullet->state = 不存在;
+		//g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
 	}
 	//是否遇敌方坦克
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
@@ -974,6 +852,7 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
 				)
 			{
+				PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 				pbullet->state = 不存在;
 				penemytank[i].blood--;
 				if (penemytank[i].blood == 0)//如果减血后为0
@@ -990,6 +869,7 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
 				)
 			{
+				PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 				pbullet->state = 不存在;
 				penemytank[i].blood--;
 				if (penemytank[i].blood == 0)//如果减血后为0
@@ -1006,6 +886,7 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
 				)
 			{
+				PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 				pbullet->state = 不存在;
 				penemytank[i].blood--;
 				if (penemytank[i].blood == 0)//如果减血后为0
@@ -1022,6 +903,7 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 				(pbullet->core.X == penemytank[i].body[4].X) && (pbullet->core.Y - penemytank[i].body[4].Y == 0)
 				)
 			{
+				PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 				pbullet->state = 不存在;
 				penemytank[i].blood--;
 				if (penemytank[i].blood == 0)//如果减血后为0
@@ -1044,11 +926,17 @@ void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank)
 		pbullet->state = 不存在;
 	}
 	//是否遇到障碍物
-	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 障碍物)
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍物)
 	{
 		pbullet->state = 不存在;
 		g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
 	}
+	//是否遇到石块障碍物
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍物)
+	{
+		pbullet->state = 不存在;
+	}
+
 	//是否遇到我方坦克
 	switch (pbullet->dir)
 	{
@@ -1062,6 +950,7 @@ void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank)
 			(pbullet->core.X == ptank->body[4].X) && (pbullet->core.Y - ptank->body[4].Y == 0)
 			)
 		{
+			PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 			pbullet->state = 不存在;
 			(ptank->blood)--;
 			if (ptank->blood == 0)//如果减血后为0
@@ -1078,6 +967,7 @@ void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank)
 			(pbullet->core.X == ptank->body[4].X) && (pbullet->core.Y - ptank->body[4].Y == 0)
 			)
 		{
+			PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 			pbullet->state = 不存在;
 			(ptank->blood)--;
 			if (ptank->blood == 0)//如果减血后为0
@@ -1094,6 +984,7 @@ void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank)
 			(pbullet->core.X == ptank->body[4].X) && (pbullet->core.Y - ptank->body[4].Y == 0)
 			)
 		{
+			PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 			pbullet->state = 不存在;
 			(ptank->blood)--;
 			if (ptank->blood == 0)//如果减血后为0
@@ -1110,6 +1001,7 @@ void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank)
 			(pbullet->core.X == ptank->body[4].X) && (pbullet->core.Y - ptank->body[4].Y == 0)
 			)
 		{
+			PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 			pbullet->state = 不存在;
 			(ptank->blood)--;
 			if (ptank->blood == 0)//如果减血后为0
@@ -1195,15 +1087,82 @@ void BarrierInit()
 		for (int y = 0; y < MAP_Y; y++)
 		{
 			if (
-				(x > MAP_X_WALL / 4 - 9 &&x < MAP_X_WALL / 4 - 5 &&y > MAP_Y / 2 - 9 &&y < MAP_Y/2 - 4) ||
-				(x < MAP_X_WALL / 4 + 9 &&x > MAP_X_WALL / 4 + 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 4)||
-				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 4)||
-				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 4)
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y > MAP_Y / 2 - 8 && y < MAP_Y / 2 - 4) ||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y > MAP_Y / 2 - 8 && y < MAP_Y / 2 - 4) ||
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 8 && y > MAP_Y / 2 + 4) ||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 8 && y > MAP_Y / 2 + 4)
 				)
 			{
-				g_MAP[x][y] = 障碍物;
+				g_MAP[x][y] = 土块障碍物;
+			}
+			if (
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 7) ||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 7) ||
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 7) ||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 7)
+				)
+			{
+				g_MAP[x][y] = 石块障碍物;
 			}
 
+
+		}
+	}
+}
+void SetBarrier()
+{
+	DrawMapBorder();		//地图边界
+
+	//提示信息
+	setColor(12, 0);
+	GotoxyAndPrint(MAP_X / 2 - 12, 4, "     编辑地图");
+	GotoxyAndPrint(MAP_X / 2 - 12, 6, "左键单击：创建障碍");
+	GotoxyAndPrint(MAP_X / 2 - 12, 8, "右键单击：消除障碍");
+	GotoxyAndPrint(MAP_X / 2 - 12, 10, "界外双击：退出编辑");
+	setColor(7, 0);
+
+	//鼠标事件相关
+	HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+	INPUT_RECORD ir = {};
+	DWORD dwCount = 0;
+	SetConsoleMode(hInput, ENABLE_MOUSE_INPUT);
+
+	//捕获鼠标事件并反馈给屏幕
+	while (true)
+	{
+		ReadConsoleInput(hInput, &ir, 1, &dwCount);
+		if (ir.EventType == MOUSE_EVENT)
+		{
+			//左键绘制
+			if (ir.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;//获取按键的位置
+				if (pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y)
+				{
+					g_MAP[pos.X / 2][pos.Y] = 土块障碍物;
+					GotoxyAndPrint(pos.X / 2, pos.Y, "■");
+				}
+			}
+			//右键消除
+			if (ir.Event.MouseEvent.dwButtonState == RIGHTMOST_BUTTON_PRESSED)
+			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;
+				if (pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y)
+				{
+					g_MAP[pos.X / 2][pos.Y] = 空地;
+					GotoxyAndPrint(pos.X / 2, pos.Y, "  ");
+				}
+			}
+			//双击退出
+			if (ir.Event.MouseEvent.dwEventFlags == DOUBLE_CLICK)
+			{
+				COORD pos = ir.Event.MouseEvent.dwMousePosition;
+				if (!(pos.X > 0 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y))
+				{
+					//地图外双击才退出
+					break;
+				}
+			}
 		}
 	}
 }
@@ -1213,10 +1172,8 @@ void DrawBarr()
 	{
 		for (int y = 0; y < MAP_Y; y++)
 		{
-			if(g_MAP[x][y] == 障碍物)
-			{
-				GotoxyAndPrint(x, y, "■");
-			}
+			if(g_MAP[x][y] == 石块障碍物) GotoxyAndPrint(x, y, "■");
+			if (g_MAP[x][y] == 土块障碍物) GotoxyAndPrint(x, y, "※");
 		}
 	}
 

@@ -10,7 +10,8 @@
 
 //提示信息
 #define 开始游戏 1
-#define 退出游戏 2
+#define 读取游戏 2
+#define 退出游戏 3
 #define 系统默认 1
 #define 自定义 2
 #define 新建地图 1
@@ -22,7 +23,8 @@
 //地图状态
 #define 空地 0
 #define 地图边界 1
-#define 障碍物 2
+#define 土块障碍物 2
+#define 石块障碍物 3
 
 //子弹状态
 #define 不存在 0
@@ -59,5 +61,6 @@ typedef struct _TANK
 	enum direction dir;	//方向
 	unsigned blood;		//血量
 	bool isAlive;		//是否存活
+	int who;			//哪一方坦克
 	BULLET bullet;		//子弹
 }TANK, * PTANK;

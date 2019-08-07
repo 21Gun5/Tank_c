@@ -20,14 +20,11 @@ int SelectAction();//¿ªÊ¼/ÍË³öÓÎÏ·
 int SelectWhoMap();//Ñ¡ÔñÏµÍ³µØÍ¼or×Ô¶¨ÒåµØÍ¼
 int SelectWhenMap();//ĞÂ»æÖÆorÀÏµØÍ¼
 
-int GetLiveEnemyAmount(PTANK penemytank);
-
-void SetMap();
-
 //Ì¹¿ËÏà¹Ø
 void DrawTank(PTANK ptank,int who);//´òÓ¡Ì¹¿Ë
 void SetTankShape(PTANK ptank);//¸ù¾İ·½ÏòÑ¡ÔñÌ¹¿ËĞÎÌ¬
 void CleanTankTail(COORD oldCore, PCOORD oldBody);//Çå³ı¾ÉÌ¹¿Ë£¨»­Ç°±Ø×ö
+int GetLiveEnemyAmount(PTANK penemytank);//»ñµÃ´æ»îµĞ¾üÊıÁ¿
 
 void ManipulateTank(PTANK ptank, int who, PTANK penemytank);//ÒÆ¶¯Ì¹¿Ë
 void ManipulateTank2(PTANK ptank, int who, PTANK pmytank, PTANK penemytank);
@@ -37,11 +34,12 @@ bool IsTankMeetOther2(PTANK ptank, int dir, PTANK pmytank, PTANK penemytank);//Ê
 //×Óµ¯Ïà¹Ø
 void MoveBullet(PBULLET pbullet);//ÒÆ¶¯×Óµ¯
 void CleanBullet(COORD oldBulCore);//ÇåÀí¾É×Óµ¯£¨»­Ç°±Ø×ö
-void DrawBullet(PBULLET pbullet);//»­×Óµ¯
+void DrawBullet(PBULLET pbullet, PTANK ptank);//»­×Óµ¯
 
 void IsBulMeetOther(PBULLET pbullet, PTANK penemytank);//¼ì²â×Óµ¯ÊÇ·ñÅöµ½ÕÏ°­¶øÏûÊ§
 void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank);
 
 //ÕÏ°­ÎïÏà¹Ø
-void BarrierInit();//³õÊ¼»¯ÕÏ°­ÎïµØÍ¼
+void BarrierInit();//Ä¬ÈÏÕÏ°­ÎïµØÍ¼
+void SetBarrier();//ÊÖ¶¯ÉèÖÃÕÏ°­
 void DrawBarr();//´òÓ¡ÕÏ°­Îï

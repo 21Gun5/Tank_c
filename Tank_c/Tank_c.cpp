@@ -15,32 +15,32 @@ int main()
 	//我方坦克
 	TANK tank = {
 		{MAP_X_WALL / 4, MAP_Y / 2},
-		{0},UP,3,true,
+		{0},UP,3,true,我方坦克,
 		{{0},UP,不存在}
 	};
 	SetTankShape(&tank);//设置形态
 
 	//敌方坦克
 	TANK enemyTank[ENEMY_TANK_AMOUNT] = {
-		{{2, 2}, {0},DOWN ,1,true,{{0},UP,不存在}},
-		{{MAP_X_WALL / 4, 2}, {0},UP,1,true,{{0},UP,不存在} },
-		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,1,true,{{0},UP,不存在} },
+		{{2, 2}, {0},DOWN ,1,true,敌方坦克,{{0},UP,不存在}},
+		{{MAP_X_WALL / 4, 2}, {0},UP,2,true,敌方坦克,{{0},UP,不存在} },
+		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,1,true,敌方坦克,{{0},UP,不存在} },
 
-		//{{2,  MAP_Y / 2}, {0},UP ,1,true,{{0},UP,不存在}},
+		//{{2,  MAP_Y / 2}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
 		//{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,{{0},UP,不存在} },
 
-		//{{2,  MAP_Y - 3}, {0},UP ,1,true,{{0},UP,不存在}},
-		//{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,{{0},UP,不存在} },
-		//{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,{{0},UP,不存在} }
+		//{{2,  MAP_Y - 3}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
+		//{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,敌方坦克,{{0},UP,不存在} },
+		//{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} }
 	};
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) {SetTankShape(&enemyTank[i]);}//设置形态
 
 	//初始化及欢迎界面
 	GameInit();
-	//BarrierInit();
+	//BarrierInit();//改用游戏流程中调用
 	DrawWelcome();
 
-	//用户选择/整体流程
+	//整体流程
 	int action = SelectAction();
 	if (action == 开始游戏)
 	{
@@ -56,7 +56,7 @@ int main()
 			int whenMap = SelectWhenMap();
 			if (whenMap == 新建地图)
 			{
-				SetMap();//BarrierInit是默认的，这是手动设置的
+				SetBarrier();//BarrierInit是默认的，这是手动设置的
 				//string _map = SetMap();
 				//pbarrier = new CBarrier;
 				//LoadMap(*pbarrier, _map);
@@ -69,12 +69,16 @@ int main()
 			}
 		}
 	}
+	else if (action == 读取游戏)
+	{
+		return 0;
+	}
 	else if (action == 退出游戏)
 	{
 		return 0;
 	}
 
-	//地图边界及障碍物
+	//边界及障碍
 	DrawMapBorder();
 	DrawGameHelp();
 	DrawBarr();
@@ -113,7 +117,7 @@ int main()
 				COORD oldBulCore = tank.bullet.core;
 				MoveBullet(&tank.bullet);
 				CleanBullet(oldBulCore);
-				DrawBullet(&tank.bullet);
+				DrawBullet(&tank.bullet,&tank);
 				IsBulMeetOther(&tank.bullet, enemyTank);
 				//IsBulMeetOther(&tank.bullet, enemyTank,&tank);
 			}
@@ -151,7 +155,7 @@ int main()
 					COORD oldBulCore = enemyTank[i].bullet.core;
 					MoveBullet(&enemyTank[i].bullet);
 					CleanBullet(oldBulCore);
-					DrawBullet(&enemyTank[i].bullet);
+					DrawBullet(&enemyTank[i].bullet, &enemyTank[i]);
 					IsBulMeetOther2(&enemyTank[i].bullet, enemyTank,&tank);
 				}
 			}
@@ -167,5 +171,6 @@ int main()
 
 	// 消耗多余字符
 	char ch = _getch();
+	ch = _getch();
 	return 0;
 }
