@@ -52,6 +52,13 @@ void GameInit()
 			{
 				g_MAP[x][y] = 地图边界;
 			}
+			if (x >= MAP_X_WALL / 4 - 2 && x <= MAP_X_WALL / 4 + 3 && y >= MAP_Y - 2 - 3 && y <= MAP_Y - 2)
+			{
+				if (x >= MAP_X_WALL / 4 && x <= MAP_X_WALL / 4 + 1 && y >= MAP_Y - 2 - 1 && y <= MAP_Y - 2)
+					g_MAP[x][y] = 我家泉水;
+				else
+					g_MAP[x][y] = 土块障碍;
+			}
 		}
 	}
 
@@ -101,6 +108,12 @@ void DrawMapBorder()
 			if (g_MAP[x][y] == 地图边界)
 			{
 				GotoxyAndPrint(x, y, "■");
+			}
+			if (g_MAP[x][y] == 我家泉水)
+			{
+				setColor(12, 0);
+				GotoxyAndPrint(x, y, "★");
+				setColor(7, 0);
 			}
 		}
 	}
@@ -217,6 +230,39 @@ int SelectWhenMap()
 
 	return input;
 }
+void SelectLevel()
+{
+	//打印提示信息
+	system("cls");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "游戏难度：");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 简单");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 一般");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 0, "3. 困难");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 + 2, "请输入选择-> ");
+	
+	SetCursorState(true);		//显示光标
+	int input = _getch() - '0';	//避免ASCII
+	SetCursorState(false);		//隐藏光标
+
+	//难度与障碍物数量成正比、与睡眠时间成反比
+	switch (input)
+	{
+	case 简单:
+		g_levelEneTank = 300;
+		g_levelEneBul = 90;
+		break;
+	case 一般:
+		g_levelEneTank = 200;
+		g_levelEneBul = 70;
+		break;
+	case 困难:
+		g_levelEneTank = 100;
+		g_levelEneBul = 50;
+		break;
+	default:
+		break;
+	}
+}
 
 //坦克相关
 void CleanTankTail(COORD oldCore, PCOORD oldBody)
@@ -299,13 +345,13 @@ int GetLiveEnemyAmount(PTANK penemytank)
 	int count = 0;
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
 	{
-		if (penemytank[i].isAlive)
+		if (penemytank[i].isAlive==true)
 			count++;
 	}
 	return count;
 }
 
-void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
+void ManipulateMyTank(PTANK ptank, int who, PTANK penemytank)
 {
 	if (ptank->isAlive == false) return;
 	if (who == 我方坦克)
@@ -317,22 +363,22 @@ void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
 			switch (ch)
 			{
 			case 'w':
-				if (!IsTankMeetOther(ptank, UP, penemytank))
+				if (!IsMyTankMeetOther(ptank, UP, penemytank))
 					ptank->core.Y--;
 				ptank->dir = UP;
 				break;
 			case 's':
-				if (!IsTankMeetOther(ptank, DOWN, penemytank))
+				if (!IsMyTankMeetOther(ptank, DOWN, penemytank))
 					ptank->core.Y++;
 				ptank->dir = DOWN;
 				break;
 			case 'a':
-				if (!IsTankMeetOther(ptank, LEFT, penemytank))
+				if (!IsMyTankMeetOther(ptank, LEFT, penemytank))
 					ptank->core.X--;
 				ptank->dir = LEFT;
 				break;
 			case 'd':
-				if (!IsTankMeetOther(ptank, RIGHT, penemytank))
+				if (!IsMyTankMeetOther(ptank, RIGHT, penemytank))
 					ptank->core.X++;
 				ptank->dir = RIGHT;
 				break;
@@ -385,7 +431,7 @@ void ManipulateTank(PTANK ptank, int who, PTANK penemytank)
 
 	SetTankShape(ptank);//每次移动后都要重新设置形态
 }
-void ManipulateTank2(PTANK ptank, int who, PTANK pmytank, PTANK penemytank)
+void ManipulateEneTank(PTANK ptank, int who, PTANK pmytank, PTANK penemytank)
 {
 	if (ptank->isAlive == false) return;
 	if (who == 敌方坦克)
@@ -393,22 +439,22 @@ void ManipulateTank2(PTANK ptank, int who, PTANK pmytank, PTANK penemytank)
 		switch (rand() % 5)
 		{
 		case UP:
-			if (!IsTankMeetOther2(ptank, UP, pmytank, penemytank))
+			if (!IsEneTankMeetOther(ptank, UP, pmytank, penemytank))
 				ptank->core.Y--;
 			ptank->dir = UP;
 			break;
 		case DOWN:
-			if (!IsTankMeetOther2(ptank, DOWN, pmytank, penemytank))
+			if (!IsEneTankMeetOther(ptank, DOWN, pmytank, penemytank))
 				ptank->core.Y++;
 			ptank->dir = DOWN;
 			break;
 		case LEFT:
-			if (!IsTankMeetOther2(ptank, LEFT, pmytank, penemytank))
+			if (!IsEneTankMeetOther(ptank, LEFT, pmytank, penemytank))
 				ptank->core.X--;
 			ptank->dir = LEFT;
 			break;
 		case RIGHT:
-			if (!IsTankMeetOther2(ptank, RIGHT, pmytank, penemytank))
+			if (!IsEneTankMeetOther(ptank, RIGHT, pmytank, penemytank))
 				ptank->core.X++;
 			ptank->dir = RIGHT;
 			break;
@@ -422,7 +468,7 @@ void ManipulateTank2(PTANK ptank, int who, PTANK pmytank, PTANK penemytank)
 	}
 	SetTankShape(ptank);//每次移动后都要重新设置形态
 }
-bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
+bool IsMyTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 {
 	switch (dir)
 	{
@@ -433,12 +479,12 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if ((g_MAP[ptank->core.X][ptank->core.Y - 2] == 土块障碍物||
-			g_MAP[ptank->core.X-1][ptank->core.Y - 2] == 土块障碍物 ||
-			g_MAP[ptank->core.X+1][ptank->core.Y - 2] == 土块障碍物) ||
-			(g_MAP[ptank->core.X][ptank->core.Y - 2] == 石块障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 石块障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 石块障碍物))
+		if ((g_MAP[ptank->core.X][ptank->core.Y - 2] == 土块障碍||
+			g_MAP[ptank->core.X-1][ptank->core.Y - 2] == 土块障碍 ||
+			g_MAP[ptank->core.X+1][ptank->core.Y - 2] == 土块障碍) ||
+			(g_MAP[ptank->core.X][ptank->core.Y - 2] == 石块障碍 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 石块障碍 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 石块障碍))
 		{
 			return true;
 		}
@@ -466,12 +512,17 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if ((g_MAP[ptank->core.X][ptank->core.Y + 2] == 土块障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 土块障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 土块障碍物) ||
-			(g_MAP[ptank->core.X][ptank->core.Y + 2] == 石块障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 石块障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 石块障碍物))
+		if ((g_MAP[ptank->core.X][ptank->core.Y + 2] == 土块障碍 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 土块障碍 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 土块障碍) ||
+			(g_MAP[ptank->core.X][ptank->core.Y + 2] == 石块障碍 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 石块障碍 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 石块障碍))
+		{
+			return true;
+		}
+		//是否遇到我家泉水
+		if (g_MAP[ptank->core.X][ptank->core.Y] == 我家泉水)
 		{
 			return true;
 		}
@@ -498,12 +549,17 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if ((g_MAP[ptank->core.X-2][ptank->core.Y] == 土块障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y -1] == 土块障碍物 ||
-			g_MAP[ptank->core.X -2][ptank->core.Y + 1] == 土块障碍物)||
-			(g_MAP[ptank->core.X - 2][ptank->core.Y] == 石块障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 石块障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 石块障碍物))
+		if ((g_MAP[ptank->core.X-2][ptank->core.Y] == 土块障碍 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y -1] == 土块障碍 ||
+			g_MAP[ptank->core.X -2][ptank->core.Y + 1] == 土块障碍)||
+			(g_MAP[ptank->core.X - 2][ptank->core.Y] == 石块障碍 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 石块障碍 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 石块障碍))
+		{
+			return true;
+		}
+		//是否遇到我家泉水
+		if (g_MAP[ptank->core.X][ptank->core.Y] == 我家泉水)
 		{
 			return true;
 		}
@@ -530,12 +586,17 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if ((g_MAP[ptank->core.X + 2][ptank->core.Y] == 土块障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 土块障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 土块障碍物) ||
-			(g_MAP[ptank->core.X + 2][ptank->core.Y] == 石块障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 石块障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 石块障碍物))
+		if ((g_MAP[ptank->core.X + 2][ptank->core.Y] == 土块障碍 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 土块障碍 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 土块障碍) ||
+			(g_MAP[ptank->core.X + 2][ptank->core.Y] == 石块障碍 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 石块障碍 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 石块障碍))
+		{
+			return true;
+		}
+		//是否遇到我家泉水
+		if (g_MAP[ptank->core.X][ptank->core.Y] == 我家泉水)
 		{
 			return true;
 		}
@@ -560,7 +621,7 @@ bool IsTankMeetOther(PTANK ptank,int dir, PTANK penemytank)
 	}
 	return false;
 }
-bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
+bool IsEneTankMeetOther(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 {
 	switch (dir)
 	{
@@ -571,15 +632,16 @@ bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if ((g_MAP[ptank->core.X][ptank->core.Y - 2] == 土块障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 土块障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 土块障碍物) ||
-			(g_MAP[ptank->core.X][ptank->core.Y - 2] == 石块障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 石块障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 石块障碍物))
+		if ((g_MAP[ptank->core.X][ptank->core.Y - 2] == 土块障碍 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 土块障碍 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 土块障碍) ||
+			(g_MAP[ptank->core.X][ptank->core.Y - 2] == 石块障碍 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y - 2] == 石块障碍 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y - 2] == 石块障碍))
 		{
 			return true;
 		}
+
 		//是否撞我方坦克
 		if (
 			((ptank->core.X == pmytank->core.X - 0) && (ptank->core.Y - pmytank->core.Y == 3)) ||
@@ -616,12 +678,17 @@ bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if ((g_MAP[ptank->core.X][ptank->core.Y + 2] == 土块障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 土块障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 土块障碍物) ||
-			(g_MAP[ptank->core.X][ptank->core.Y + 2] == 石块障碍物 ||
-			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 石块障碍物 ||
-			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 石块障碍物))
+		if ((g_MAP[ptank->core.X][ptank->core.Y + 2] == 土块障碍 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 土块障碍 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 土块障碍) ||
+			(g_MAP[ptank->core.X][ptank->core.Y + 2] == 石块障碍 ||
+			g_MAP[ptank->core.X - 1][ptank->core.Y + 2] == 石块障碍 ||
+			g_MAP[ptank->core.X + 1][ptank->core.Y + 2] == 石块障碍))
+		{
+			return true;
+		}
+		//是否遇到我家泉水
+		if (g_MAP[ptank->core.X][ptank->core.Y] == 我家泉水)
 		{
 			return true;
 		}
@@ -660,12 +727,17 @@ bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if ((g_MAP[ptank->core.X - 2][ptank->core.Y] == 土块障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 土块障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 土块障碍物) ||
-			(g_MAP[ptank->core.X - 2][ptank->core.Y] == 石块障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 石块障碍物 ||
-			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 石块障碍物))
+		if ((g_MAP[ptank->core.X - 2][ptank->core.Y] == 土块障碍 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 土块障碍 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 土块障碍) ||
+			(g_MAP[ptank->core.X - 2][ptank->core.Y] == 石块障碍 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y - 1] == 石块障碍 ||
+			g_MAP[ptank->core.X - 2][ptank->core.Y + 1] == 石块障碍))
+		{
+			return true;
+		}
+		//是否遇到我家泉水
+		if (g_MAP[ptank->core.X][ptank->core.Y] == 我家泉水)
 		{
 			return true;
 		}
@@ -704,12 +776,17 @@ bool IsTankMeetOther2(PTANK ptank, int dir,  PTANK pmytank, PTANK penemytank)
 			return true;
 		}
 		//是否撞障碍物
-		if ((g_MAP[ptank->core.X + 2][ptank->core.Y] == 土块障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 土块障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 土块障碍物) ||
-			(g_MAP[ptank->core.X + 2][ptank->core.Y] == 石块障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 石块障碍物 ||
-			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 石块障碍物))
+		if ((g_MAP[ptank->core.X + 2][ptank->core.Y] == 土块障碍 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 土块障碍 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 土块障碍) ||
+			(g_MAP[ptank->core.X + 2][ptank->core.Y] == 石块障碍 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y - 1] == 石块障碍 ||
+			g_MAP[ptank->core.X + 2][ptank->core.Y + 1] == 石块障碍))
+		{
+			return true;
+		}
+		//是否遇到我家泉水
+		if (g_MAP[ptank->core.X][ptank->core.Y] == 我家泉水)
 		{
 			return true;
 		}
@@ -795,14 +872,20 @@ void DrawBullet(PBULLET pbullet,PTANK ptank)
 	}
 
 	//碰到障碍，将子弹画为空格，实现子弹消失
-	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍物)
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍)
 	{
 		GotoxyAndPrint(pbullet->core.X, pbullet->core.Y, "  ");
 	}
-	//碰到石块障碍物，换成其颜色，实现子弹消失的效果
-	else if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍物)
+	//碰到石块障碍物，，实现子弹消失的效果
+	else if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍)
 	{
 		setColor(7, 0);
+	}
+	//碰到泉水，将子弹换成其颜色和形状，实现子弹消失
+	else if (g_MAP[pbullet->core.X][pbullet->core.Y] == 我家泉水)
+	{
+		setColor(12, 0);
+		GotoxyAndPrint(pbullet->core.X, pbullet->core.Y, "★");
 	}
 	//一般运动状态
 	else
@@ -812,7 +895,7 @@ void DrawBullet(PBULLET pbullet,PTANK ptank)
 	setColor(7, 0);
 }
 
-void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
+void IsMyBulMeetOther(PBULLET pbullet, PTANK penemytank,PTANK ptank)
 {
 	//是否遇到边界
 	if (pbullet->core.X <= 0 ||
@@ -824,17 +907,23 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 		pbullet->state = 不存在;
 	}
 	//是否遇到土块障碍物
-	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍物)
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍)
 	{
 		//PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 		pbullet->state = 不存在;
 		g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
 	}
 	//是否遇到石块障碍物
-	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍物)
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍)
 	{
 		pbullet->state = 不存在;
 		//g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
+	}
+	//是否遇到我家泉水
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 我家泉水)
+	{
+		pbullet->state = 不存在;
+		//ptank->blood = 0;//泉水打到，我方坦克当场去世
 	}
 	//是否遇敌方坦克
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
@@ -855,8 +944,10 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 				PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 				pbullet->state = 不存在;
 				penemytank[i].blood--;
-				if (penemytank[i].blood == 0)//如果减血后为0
-					penemytank[i].isAlive = false;//声明为死亡
+				if (penemytank[i].blood == 0)//减血后为0则死亡
+					penemytank[i].isAlive = false;
+				if (!penemytank[i].isAlive && (ENEMY_TANK_AMOUNT - GetLiveEnemyAmount(penemytank)) % 3 == 0)//每打死三个生命值+1
+					(ptank->blood)++;//要加!penemytank[i].isAlive，要不打到多条命的敌坦也加命
 			}
 			break;
 		case DOWN:
@@ -872,8 +963,10 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 				PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 				pbullet->state = 不存在;
 				penemytank[i].blood--;
-				if (penemytank[i].blood == 0)//如果减血后为0
-					penemytank[i].isAlive = false;//声明为死亡
+				if (penemytank[i].blood == 0)//减血后为0则死亡
+					penemytank[i].isAlive = false;
+				if (!penemytank[i].isAlive && (ENEMY_TANK_AMOUNT - GetLiveEnemyAmount(penemytank)) % 3 == 0)//每打死三个生命值+1
+					(ptank->blood)++;
 			}
 			break;
 		case LEFT:
@@ -889,8 +982,10 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 				PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 				pbullet->state = 不存在;
 				penemytank[i].blood--;
-				if (penemytank[i].blood == 0)//如果减血后为0
-					penemytank[i].isAlive = false;//声明为死亡
+				if (penemytank[i].blood == 0)//减血后为0则死亡
+					penemytank[i].isAlive = false;
+				if (!penemytank[i].isAlive && (ENEMY_TANK_AMOUNT - GetLiveEnemyAmount(penemytank)) % 3 == 0)//每打死三个生命值+1
+					(ptank->blood)++;
 			}
 			break;
 		case RIGHT:
@@ -906,8 +1001,10 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 				PlaySound(TEXT("conf/duang.wav"), NULL, SND_FILENAME | SND_ASYNC);//播放音效
 				pbullet->state = 不存在;
 				penemytank[i].blood--;
-				if (penemytank[i].blood == 0)//如果减血后为0
-					penemytank[i].isAlive = false;//声明为死亡
+				if (penemytank[i].blood == 0)//减血后为0则死亡
+					penemytank[i].isAlive = false;
+				if (!penemytank[i].isAlive&&(ENEMY_TANK_AMOUNT - GetLiveEnemyAmount(penemytank)) % 3 == 0)//每打死三个生命值+1
+					(ptank->blood)++;
 			}
 			break;
 		default:
@@ -915,7 +1012,7 @@ void IsBulMeetOther(PBULLET pbullet, PTANK penemytank)
 		}
 	}
 }
-void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank)
+void IsEneBulMeetOther(PBULLET pbullet, PTANK penemytank, PTANK ptank)
 {
 	//是否遇到边界
 	if (pbullet->core.X <= 0 ||
@@ -926,17 +1023,22 @@ void IsBulMeetOther2(PBULLET pbullet, PTANK penemytank, PTANK ptank)
 		pbullet->state = 不存在;
 	}
 	//是否遇到障碍物
-	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍物)
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 土块障碍)
 	{
 		pbullet->state = 不存在;
 		g_MAP[pbullet->core.X][pbullet->core.Y] = 空地;
 	}
 	//是否遇到石块障碍物
-	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍物)
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 石块障碍)
 	{
 		pbullet->state = 不存在;
 	}
-
+	//是否遇到我家泉水
+	if (g_MAP[pbullet->core.X][pbullet->core.Y] == 我家泉水)
+	{
+		pbullet->state = 不存在;
+		ptank->blood = 0;//泉水打到，我方坦克当场去世
+	}
 	//是否遇到我方坦克
 	switch (pbullet->dir)
 	{
@@ -1089,21 +1191,29 @@ void BarrierInit()
 			if (
 				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y > MAP_Y / 2 - 8 && y < MAP_Y / 2 - 4) ||
 				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y > MAP_Y / 2 - 8 && y < MAP_Y / 2 - 4) ||
-				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 8 && y > MAP_Y / 2 + 4) ||
-				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 8 && y > MAP_Y / 2 + 4)
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 6 && y > MAP_Y / 2 + 2) ||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 6 && y > MAP_Y / 2 + 2)
 				)
 			{
-				g_MAP[x][y] = 土块障碍物;
+				g_MAP[x][y] = 土块障碍;
 			}
 			if (
 				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 7) ||
 				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y > MAP_Y / 2 - 9 && y < MAP_Y / 2 - 7) ||
-				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 7) ||
-				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 9 && y > MAP_Y / 2 + 7)
+				(x > MAP_X_WALL / 4 - 9 && x < MAP_X_WALL / 4 - 5 && y < MAP_Y / 2 + 7 && y > MAP_Y / 2 + 5) ||
+				(x < MAP_X_WALL / 4 + 9 && x > MAP_X_WALL / 4 + 5 && y < MAP_Y / 2 + 7 && y > MAP_Y / 2 + 5)
 				)
 			{
-				g_MAP[x][y] = 石块障碍物;
+				g_MAP[x][y] = 石块障碍;
 			}
+
+			//if (x >= MAP_X_WALL / 4 - 2 && x <= MAP_X_WALL / 4 + 3 && y >= MAP_Y - 2 - 3 && y <= MAP_Y - 2)
+			//{
+			//	if (x >= MAP_X_WALL / 4 && x <= MAP_X_WALL / 4 + 1 && y >= MAP_Y - 2 - 1 && y <= MAP_Y - 2)
+			//		g_MAP[x][y] = 我家泉水;
+			//	else
+			//		g_MAP[x][y] = 土块障碍;
+			//}
 
 
 		}
@@ -1156,10 +1266,15 @@ void SetBarrier(PTANK ptank, PTANK penemytank)
 						//continue;//作用域是此for
 				}
 				if(flag==1) continue;
-				//可绘制处（除边界、坦克）
+				//不可在泉水绘制
+				if (pos.X/2 >= MAP_X_WALL / 4 &&
+					pos.X/2 <= MAP_X_WALL / 4 + 1 &&
+					pos.Y >= MAP_Y - 2 - 1 && 
+					pos.Y <= MAP_Y - 2) continue;
+				//可绘制处（除边界、坦克、泉水）
 				if (pos.X > 1 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y-1)
 				{
-					g_MAP[pos.X / 2][pos.Y] = 土块障碍物;
+					g_MAP[pos.X / 2][pos.Y] = 土块障碍;
 					GotoxyAndPrint(pos.X / 2, pos.Y, "※");
 				}
 			}
@@ -1185,10 +1300,15 @@ void SetBarrier(PTANK ptank, PTANK penemytank)
 					//continue;//作用域是此for
 				}
 				if (flag == 1) continue;
-				//可绘制处（除边界、坦克）
+				//不可在泉水绘制
+				if (pos.X / 2 >= MAP_X_WALL / 4 - 2 &&
+					pos.X / 2 <= MAP_X_WALL / 4 + 3 &&
+					pos.Y >= MAP_Y - 2 - 3 &&
+					pos.Y <= MAP_Y - 2) continue;
+				//可绘制处（除边界、坦克、泉水）
 				if (pos.X > 1 && pos.X < MAP_X_WALL && pos.Y >0 && pos.Y < MAP_Y-1)
 				{
-					g_MAP[pos.X / 2][pos.Y] = 石块障碍物;
+					g_MAP[pos.X / 2][pos.Y] = 石块障碍;
 					GotoxyAndPrint(pos.X / 2, pos.Y, "■");
 				}
 			}
@@ -1221,8 +1341,14 @@ void DrawBarr()
 	{
 		for (int y = 0; y < MAP_Y; y++)
 		{
-			if(g_MAP[x][y] == 石块障碍物) GotoxyAndPrint(x, y, "■");
-			if (g_MAP[x][y] == 土块障碍物) GotoxyAndPrint(x, y, "※");
+			if(g_MAP[x][y] == 石块障碍) GotoxyAndPrint(x, y, "■");
+			if (g_MAP[x][y] == 土块障碍) GotoxyAndPrint(x, y, "※");
+			//if (g_MAP[x][y] == 我家泉水)
+			//{
+			//	setColor(12, 0);
+			//	GotoxyAndPrint(x, y, "★");
+			//	setColor(7, 0);
+			//}
 		}
 	}
 

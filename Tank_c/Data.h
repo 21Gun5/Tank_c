@@ -6,7 +6,7 @@
 #define MAP_Y 30		//下边界
 #define MAP_X_WALL 60	//右边界
 
-#define ENEMY_TANK_AMOUNT 8
+#define ENEMY_TANK_AMOUNT 7
 
 //提示信息
 #define 开始游戏 1
@@ -23,19 +23,27 @@
 //地图状态
 #define 空地 0
 #define 地图边界 1
-#define 土块障碍物 2
-#define 石块障碍物 3
+#define 土块障碍 2
+#define 石块障碍 3
+#define 我家泉水 4
 
 //子弹状态
 #define 不存在 0
 #define 未赋值 1
 #define 已赋值 2
 
+//难度
+#define 简单 1
+#define 一般 2
+#define 困难 3
+
 
 
 //全局变量
 extern int g_MAP[MAP_X][MAP_Y];	//地图数组
 extern bool g_isRunning;		//游戏是否运行
+extern int g_levelEneTank;		//敌坦速度控制难度，越大越简单
+extern int g_levelEneBul;		//敌方子弹速度控制难度，越大越简单
 
 //extern int g_isBulExist;		//子弹是否还存在（没打在边界或障碍物上
 //extern int g_enemyTankAmount;	//敌坦数量

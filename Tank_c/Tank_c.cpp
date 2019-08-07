@@ -22,16 +22,16 @@ int main()
 
 	//敌方坦克
 	TANK enemyTank[ENEMY_TANK_AMOUNT] = {
-		{{2, 2}, {0},DOWN ,1,true,敌方坦克,{{0},UP,不存在}},
-		{{MAP_X_WALL / 4, 2}, {0},UP,2,true,敌方坦克,{{0},UP,不存在} },
-		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,1,true,敌方坦克,{{0},UP,不存在} },
+		{{2, 2}, {0},DOWN ,2,true,敌方坦克,{{0},UP,不存在}},
+		{{MAP_X_WALL / 4, 2}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} },
+		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,2,true,敌方坦克,{{0},UP,不存在} },
 
 		{{2,  MAP_Y / 2}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
 		{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} },
 
-		{{2,  MAP_Y - 3}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
-		{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,1,true,敌方坦克,{{0},UP,不存在} },
-		{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} }
+		{{2,  MAP_Y - 3}, {0},UP ,2,true,敌方坦克,{{0},UP,不存在}},
+		//{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,2,true,敌方坦克,{{0},UP,不存在} },
+		{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,2,true,敌方坦克,{{0},UP,不存在} }
 	};
 	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) {SetTankShape(&enemyTank[i]);}//设置形态
 
@@ -47,6 +47,7 @@ int main()
 		int whoMap = SelectWhoMap();
 		if (whoMap == 系统默认)
 		{
+			SelectLevel();
 			BarrierInit();
 		}
 		else if (whoMap == 自定义)
@@ -90,7 +91,7 @@ int main()
 			time4Tank = clock();
 			COORD oldCore = tank.core;
 			COORD oldBody[5] = { tank.body[0],tank.body[1],tank.body[2],tank.body[3],tank.body[4] };
-			ManipulateTank(&tank, 我方坦克, enemyTank);
+			ManipulateMyTank(&tank, 我方坦克, enemyTank);
 			CleanTankTail(oldCore, oldBody);
 			DrawTank(&tank,我方坦克);
 		}
@@ -113,27 +114,27 @@ int main()
 				MoveBullet(&tank.bullet);
 				CleanBullet(oldBulCore);
 				DrawBullet(&tank.bullet,&tank);
-				IsBulMeetOther(&tank.bullet, enemyTank);
+				IsMyBulMeetOther(&tank.bullet, enemyTank,&tank);
 				//IsBulMeetOther(&tank.bullet, enemyTank,&tank);
 			}
 		}
 
 		//敌方坦克线程
-		if (clock() - time4EnemyTank >= 100)
+		if (clock() - time4EnemyTank >= g_levelEneTank)
 		{
 			for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
 			{
 				time4EnemyTank = clock();
 				COORD oldCore = enemyTank[i].core;
 				COORD oldBody[5] = { enemyTank[i].body[0],enemyTank[i].body[1],enemyTank[i].body[2],enemyTank[i].body[3],enemyTank[i].body[4] };
-				ManipulateTank2(&enemyTank[i], 敌方坦克,&tank,enemyTank);
+				ManipulateEneTank(&enemyTank[i], 敌方坦克,&tank,enemyTank);
 				CleanTankTail(oldCore, oldBody);
 				DrawTank(&enemyTank[i], 敌方坦克);
 			}
 		}
 
 		//敌方子弹线程
-		if (clock() - time4EnemyBullet >= 50)
+		if (clock() - time4EnemyBullet >= g_levelEneBul)
 		{
 			for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
 			{
@@ -151,7 +152,7 @@ int main()
 					MoveBullet(&enemyTank[i].bullet);
 					CleanBullet(oldBulCore);
 					DrawBullet(&enemyTank[i].bullet, &enemyTank[i]);
-					IsBulMeetOther2(&enemyTank[i].bullet, enemyTank,&tank);
+					IsEneBulMeetOther(&enemyTank[i].bullet, enemyTank,&tank);
 				}
 			}
 		}
