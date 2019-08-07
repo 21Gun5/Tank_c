@@ -397,11 +397,12 @@ void ManipulateMyTank(PTANK ptank, int who, PTANK penemytank)
 				GotoxyAndPrint(MAP_X / 2 - 14, 1, "PAUSE");
 				GotoxyAndPrint(MAP_X / 2 - 14, 2, "1. 回到游戏");
 				GotoxyAndPrint(MAP_X / 2 - 14, 3, "2. 退出游戏");
+
 				char tmp;
 				do
 				{
 					tmp = _getch();	//利用阻塞函数暂停游戏
-				} while (!(tmp == '1' || tmp == '2'));//只有输入12才可
+				} while (!(tmp == '1' || tmp == '2'|| tmp == '3'));//只有输入123才可
 
 				switch (tmp)
 				{
@@ -416,9 +417,25 @@ void ManipulateMyTank(PTANK ptank, int who, PTANK penemytank)
 				}
 				case '2'://退出游戏
 				{
-					GameOver(penemytank);
-					g_isRunning = false;
-					break;
+					
+					GotoxyAndPrint(MAP_X / 2 - 14, 1,"想如何退出?");
+					GotoxyAndPrint(MAP_X / 2 - 14, 2,"1. 保存退出");
+					GotoxyAndPrint(MAP_X / 2 - 14, 3, "2. 直接退出");
+
+					char op = _getch();
+					if (op == '1')		//保存退出
+					{
+						SaveGame(ptank,penemytank);
+						GameOver(penemytank);
+						g_isRunning = false;
+						break;
+					}
+					else if (op == '2')	//直接退出
+					{
+						GameOver(penemytank);
+						g_isRunning = false;
+						break;
+					}
 				}
 				default:
 					break;
@@ -1364,7 +1381,6 @@ void SetBarrier(PTANK ptank, PTANK penemytank)
 	}
 	fclose(pFile);
 
-	//return str;
 }
 void LoadMap(char * str)
 {
@@ -1441,6 +1457,167 @@ void DrawBarr()
 			//}
 		}
 	}
+
+}
+
+//游戏存档
+void SaveGame(PTANK ptank, PTANK penemytank)
+{
+	//提示信息
+	system("cls");
+	setColor(12, 0);
+	GotoxyAndPrint(MAP_X / 2 - 12, 12, "请输入存档名字");
+	GotoxyAndPrint(MAP_X / 2 - 12, 14,"");
+
+	//输入文件名
+	char str[15];
+	char* filename = (char*)malloc(40);
+	SetCursorState(true);
+	scanf_s("%s", str, 15);
+	SetCursorState(false);
+	setColor(7, 0);
+	sprintf_s(filename, 40, "%s%s%s", "conf/game/", str, ".i");
+
+	//打开文件
+	FILE* pFile = NULL;
+	errno_t err = fopen_s(&pFile, filename, "wb");
+
+	//写入全局变量
+	fwrite(&g_isRunning, sizeof(int), 1, pFile);		//游戏运行状态
+	fwrite(&g_levelEneTank, sizeof(int), 1, pFile);	//写入难度，控制敌方坦克速度
+	fwrite(&g_levelEneBul,sizeof(int), 1, pFile);	//写入难度，控制敌方子弹速度
+	
+	//写入障碍
+	for (int x = 0; x < MAP_X_WALL; x++)
+	{
+		for (int y = 0; y < MAP_Y; y++)
+		{
+			fwrite(&g_MAP[x][y], sizeof(int), 1, pFile);
+		}
+	}
+	//写入我方坦克
+	fwrite(&ptank->core, sizeof(COORD), 1, pFile);//中心节点
+	for (int i = 0; i < 5; i++)
+		fwrite(&ptank->body[i], sizeof(COORD), 1, pFile);//其他节点
+	fwrite(&ptank->dir, sizeof(int), 1, pFile);//方向
+	fwrite(&ptank->blood, sizeof(int), 1, pFile);//血量
+	fwrite(&ptank->isAlive, sizeof(bool), 1, pFile);//是否存活
+	fwrite(&ptank->who, sizeof(int), 1, pFile);//身份
+	//写入我方子弹
+	fwrite(&ptank->bullet.core, sizeof(COORD), 1, pFile);//坐标
+	fwrite(&ptank->bullet.dir, sizeof(int), 1, pFile);//方向
+	fwrite(&ptank->bullet.state, sizeof(int), 1, pFile);//状态
+	//写入敌方
+	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
+	{
+		//写入敌方坦克
+		fwrite(&penemytank[i].core, sizeof(COORD), 1, pFile);//中心节点
+		for (int i = 0; i < 5; i++)
+			fwrite(&penemytank[i].body[i], sizeof(COORD), 1, pFile);//其他节点
+		fwrite(&penemytank[i].dir, sizeof(int), 1, pFile);//方向
+		fwrite(&penemytank[i].blood, sizeof(int), 1, pFile);//血量
+		fwrite(&penemytank[i].isAlive, sizeof(bool), 1, pFile);//是否存活
+		fwrite(&penemytank[i].who, sizeof(int), 1, pFile);//身份
+		//写入敌方子弹
+		fwrite(&penemytank[i].bullet.core, sizeof(COORD), 1, pFile);//坐标
+		fwrite(&penemytank[i].bullet.dir, sizeof(int), 1, pFile);//方向
+		fwrite(&penemytank[i].bullet.state, sizeof(int), 1, pFile);//状态
+	}
+
+	fclose(pFile);
+}
+void LoadGame(PTANK ptank, PTANK penemytank,char * str)
+{
+	char* filename = (char*)malloc(40);
+	sprintf_s(filename, 40, "%s%s", "conf/game/", str);
+
+	FILE* pFile = NULL;
+	errno_t err = fopen_s(&pFile, filename, "rb");
+
+
+	//读取全局变量
+	fread(&g_isRunning, sizeof(int), 1, pFile);		//游戏运行状态
+	fread(&g_levelEneTank, sizeof(int), 1, pFile);	//读取难度，控制敌方坦克速度
+	fread(&g_levelEneBul, sizeof(int), 1, pFile);	//读取难度，控制敌方子弹速度
+
+	//读取障碍
+	for (int x = 0; x < MAP_X_WALL; x++)
+	{
+		for (int y = 0; y < MAP_Y; y++)
+		{
+			fread(&g_MAP[x][y], sizeof(int), 1, pFile);
+		}
+	}
+	//读取我方坦克
+	fread(&ptank->core, sizeof(COORD), 1, pFile);//中心节点
+	for (int i = 0; i < 5; i++)
+		fread(&ptank->body[i], sizeof(COORD), 1, pFile);//其他节点
+	fread(&ptank->dir, sizeof(int), 1, pFile);//方向
+	fread(&ptank->blood, sizeof(int), 1, pFile);//血量
+	fread(&ptank->isAlive, sizeof(bool), 1, pFile);//是否存活
+	fread(&ptank->who, sizeof(int), 1, pFile);//身份
+	//读取我方子弹
+	fread(&ptank->bullet.core, sizeof(COORD), 1, pFile);//坐标
+	fread(&ptank->bullet.dir, sizeof(int), 1, pFile);//方向
+	fread(&ptank->bullet.state, sizeof(int), 1, pFile);//状态
+	//读取敌方
+	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++)
+	{
+		//读取敌方坦克
+		fread(&penemytank[i].core, sizeof(COORD), 1, pFile);//中心节点
+		for (int i = 0; i < 5; i++)
+			fread(&penemytank[i].body[i], sizeof(COORD), 1, pFile);//其他节点
+		fread(&penemytank[i].dir, sizeof(int), 1, pFile);//方向
+		fread(&penemytank[i].blood, sizeof(int), 1, pFile);//血量
+		fread(&penemytank[i].isAlive, sizeof(bool), 1, pFile);//是否存活
+		fread(&penemytank[i].who, sizeof(int), 1, pFile);//身份
+		//读取敌方子弹
+		fread(&penemytank[i].bullet.core, sizeof(COORD), 1, pFile);//坐标
+		fread(&penemytank[i].bullet.dir, sizeof(int), 1, pFile);//方向
+		fread(&penemytank[i].bullet.state, sizeof(int), 1, pFile);//状态
+	}
+	fclose(pFile);
+}
+char* ShowGames()
+{
+	//遍历指定目录及后缀的文件名并存入数组
+	const char* g_Maps[10] = { nullptr };
+	long Handle;
+	struct _finddata_t FileInfo;
+	int count = 0;
+	if ((Handle = _findfirst("conf/game/*.i", &FileInfo)) == -1L)
+		printf("Not Found\n");
+	else
+	{
+		g_Maps[count] = FileInfo.name;
+		count++;
+		while (_findnext(Handle, &FileInfo) == 0)
+		{
+			g_Maps[count] = FileInfo.name;
+			count++;
+		}
+
+		_findclose(Handle);
+	}
+
+	//显示存档文件
+	system("cls");
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 8, "请选择存档");
+	int i = 0;								//循环变量在for外定义
+	for (; i < count; i++)
+	{
+		GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + i, "");
+		printf("%d.%s", i + 1, g_Maps[i]);
+	}
+	//选择
+	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + i, "请输入选择-> ");
+	SetCursorState(true);
+	int input = _getch() - '0';				//保证0-9而非ASCII
+	SetCursorState(false);
+
+	char* _file = (char*)malloc(15);
+	strcpy_s(_file, 15, g_Maps[input - 1]);//数字始于1，而下标始于0	
+	return _file;
 
 }
 

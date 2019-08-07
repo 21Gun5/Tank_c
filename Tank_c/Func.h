@@ -43,6 +43,11 @@ void IsEneBulMeetOther(PBULLET pbullet, PTANK penemytank, PTANK ptank);
 //障碍物相关
 void BarrierInit();//默认障碍物地图
 void SetBarrier(PTANK ptank, PTANK penemytank);//手动设置障碍
-char* ShowMaps();//显示所有地图
+char* ShowMaps();//显示所有地图并选择
 void LoadMap(char* str);//导入地图
 void DrawBarr();//打印障碍物
+
+//游戏存档
+void SaveGame(PTANK ptank, PTANK penemytank);//保存游戏
+char* ShowGames();//显示所有存档并选择
+void LoadGame(PTANK ptank, PTANK penemytank, char* str);//读档

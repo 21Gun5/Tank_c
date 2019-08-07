@@ -60,14 +60,15 @@ int main()
 			}
 			else if (whenMap == 已有地图)
 			{
-				char* str = ShowMaps();
-				LoadMap(str);//导入已有地图
+				char* _map = ShowMaps();
+				LoadMap(_map);//导入已有地图
 			}
 		}
 	}
 	else if (action == 读取游戏)
 	{
-		return 0;
+		char* _game= ShowGames();
+		LoadGame(&tank,enemyTank,_game);
 	}
 	else if (action == 退出游戏)
 	{
