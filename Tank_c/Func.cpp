@@ -68,7 +68,7 @@ void GameInit()
 char* ShowGameFile()
 {
 	//遍历指定目录及后缀的文件名并存入数组
-	const char* g_Maps[10] = { nullptr };
+	char* gameFiles[10] = { nullptr };
 	long Handle;
 	struct _finddata_t FileInfo;
 	int count = 0;
@@ -76,11 +76,15 @@ char* ShowGameFile()
 		printf("Not Found\n");
 	else
 	{
-		g_Maps[count] = FileInfo.name;
+		gameFiles[count] = (char*)malloc(20);
+		strcpy_s(gameFiles[count], 20, FileInfo.name);
+		//g_Maps[count] = FileInfo.name;
 		count++;
 		while (_findnext(Handle, &FileInfo) == 0)
 		{
-			g_Maps[count] = FileInfo.name;
+			gameFiles[count] = (char*)malloc(20);
+			strcpy_s(gameFiles[count], 20, FileInfo.name);
+			//g_Maps[count] = FileInfo.name;
 			count++;
 		}
 		_findclose(Handle);
@@ -92,7 +96,7 @@ char* ShowGameFile()
 	for (; i < count; i++)
 	{
 		GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + i, "");
-		printf("%d.%s", i + 1, g_Maps[i]);
+		printf("%d.%s", i + 1, gameFiles[i]);
 	}
 	//选择
 	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + i, "请输入选择-> ");
@@ -100,7 +104,7 @@ char* ShowGameFile()
 	int input = _getch() - '0';				//保证0-9而非ASCII
 	SetCursorState(false);
 	char* _file = (char*)malloc(15);
-	strcpy_s(_file, 15, g_Maps[input - 1]);//数字始于1，而下标始于0	
+	strcpy_s(_file, 15, gameFiles[input - 1]);//数字始于1，而下标始于0	
 	return _file;
 }
 void GameOver(PTANK penemytank)
@@ -1262,7 +1266,7 @@ void IsEneBulMeetOther(PBULLET pbullet, PTANK penemytank, PTANK ptank)
 char* ShowMapFile()
 {
 	//遍历指定目录及后缀的文件名并存入数组
-	const char* g_Maps[10] = { nullptr };
+	char* mapFiles[10] = { nullptr };
 	long Handle;
 	struct _finddata_t FileInfo;
 	int count = 0;
@@ -1270,11 +1274,15 @@ char* ShowMapFile()
 		printf("Not Found\n");
 	else
 	{
-		g_Maps[count] = FileInfo.name;
+		mapFiles[count] = (char*)malloc(20);
+		strcpy_s(mapFiles[count], 20, FileInfo.name);
+		//g_Maps[count] = FileInfo.name;
 		count++;
 		while (_findnext(Handle, &FileInfo) == 0)
 		{
-			g_Maps[count] = FileInfo.name;
+			mapFiles[count] = (char*)malloc(20);
+			strcpy_s(mapFiles[count], 20, FileInfo.name);
+			//g_Maps[count] = FileInfo.name;
 			count++;
 		}
 		_findclose(Handle);
@@ -1286,7 +1294,7 @@ char* ShowMapFile()
 	for (; i < count; i++)
 	{
 		GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + i, "");
-		printf("%d.%s", i + 1, g_Maps[i]);
+		printf("%d.%s", i + 1, mapFiles[i]);
 	}
 	//选择
 	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + i, "请输入选择-> ");
@@ -1294,7 +1302,7 @@ char* ShowMapFile()
 	int input = _getch() - '0';				//保证0-9而非ASCII
 	SetCursorState(false);
 	char* _file = (char*)malloc(15);
-	strcpy_s(_file, 15, g_Maps[input - 1]);//数字始于1，而下标始于0	
+	strcpy_s(_file, 15, mapFiles[input - 1]);//数字始于1，而下标始于0	
 	return _file;
 }
 void SetDefaultMap()
