@@ -121,7 +121,7 @@ void DrawMapBorder()
 	}
 	//setColor(7, 0);
 }
-void DrawWelcome()
+void DrawWelcome(const char** menu,int size,int index)
 {
 	//打印图案
 	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 15, "MMP\"\"MM\"\"YMM                      `7MM      ");
@@ -132,15 +132,32 @@ void DrawWelcome()
 	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 10, "     MM      8M   MM    MM    MM    MM `Mb. ");
 	GotoxyAndPrint(MAP_X / 4 - 9, MAP_Y / 2 - 9,  "   .JMML.    `Moo9^Yo..JMML  JMML..JMML. YA.");
 	//提示信息
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "1. 新游戏\n");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "2. 读取游戏\n");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "3. 退出游戏\n");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 0, "请输入选择-> ");
+	for (int i = 0; i < size; i++)//菜单条数
+	{
+		if (i == index)
+		{
+			setColor(12, 0);
+			GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + 2*i, menuAction[i]);
+			setColor(7, 0);
+		}
+		else
+			GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + 2*i, menuAction[i]);
+	}
+
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "1. 新游戏\n");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "2. 读取游戏\n");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "3. 退出游戏\n");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 0, "请输入选择-> ");
 }
 void DrawGameInfo(PTANK ptank, PTANK penemytank)
 {
 	//存活敌坦数量
 	int eneTankCount = GetLiveEnemyAmount(penemytank);
+
+	//char level[10];
+	//if (g_levelEneBul == 300) strcpy_s(level, 10,"简单\0");
+	//else if (g_levelEneBul == 200) strcpy_s(level, 10, "一般\0");
+	//else if (g_levelEneBul == 100)strcpy_s(level, 10, "困难\0");
 
 	//运行or暂停状态
 	setColor(12, 0);
@@ -154,7 +171,9 @@ void DrawGameInfo(PTANK ptank, PTANK penemytank)
 	printf("当前生命: %d", ptank->blood);
 	GotoxyAndPrint(MAP_X / 2 - 11, 7, "");
 	printf("当前分数: %d", ENEMY_TANK_AMOUNT - eneTankCount);
-	GotoxyAndPrint(MAP_X / 2 - 11, 9, "");
+	//GotoxyAndPrint(MAP_X / 2 - 11, 9, "");
+	//printf("当前难度: %s", level);
+	GotoxyAndPrint(MAP_X / 2 - 11, 11, "");
 	printf("敌坦个数: %d", eneTankCount);
 	setColor(7, 0);
 }
@@ -170,100 +189,232 @@ void DrawGameHelp()
 	setColor(7, 0);
 }
 
-int SelectAction()
+int SelectAction(int size, int *pindex)
 {
-	SetCursorState(true);			//用户输入时，光标可见
-	int input = _getch() - '0';		//无回显接收；-'0'保证在0-9，而非ASCII
-	//int input = 1;
-	SetCursorState(false);			//输入完隐藏光标
-
+	//SetCursorState(true);			//光标可见
+	int input = _getch();			//无回显接收
+	//SetCursorState(false);			//隐藏光标
 	switch (input)
 	{
-	case 开始游戏:
-	{
-		g_isRunning = true;
+	case _UP:
+		if (*pindex > 0)
+			* pindex -= 1;
 		break;
-	}
-	case 读取游戏:
-	{
-		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "头发正在掉，敬请期待！\n");
+	case _DOWN:
+		if (*pindex < size - 1)//最后一条位置
+			* pindex += 1;
 		break;
-	}
-	case 退出游戏:
-	{
-		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "Bye! \n");
+	case ENTER:
+		return ENTER;
 		break;
-	}
 	default:
-		GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "输入错误\n");
 		break;
 	}
-	return input;
-}
-int SelectWhoMap()
-{
-	//提示信息
-	system("cls");				//换页则清屏
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "请选择地图：");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 系统默认");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 玩家提供");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2,"请输入选择-> ");
+	return 0;
 
-	SetCursorState(true);		//用户输入前显示光标
-	int input = _getch() - '0';	//控制其0-9，而非ASCII
-	//int input = 1;
-	SetCursorState(false);		//输入结束后隐藏光标
 
-	return input;
+	//SetCursorState(true);			//光标可见
+	//int input = _getch() - '0';		//无回显接收
+	////int input = 1;
+	//SetCursorState(false);			//隐藏光标
+
+	//switch (input)
+	//{
+	//case 开始游戏:
+	//{
+	//	g_isRunning = true;
+	//	break;
+	//}
+	//case 读取游戏:
+	//{
+	//	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "头发正在掉，敬请期待！\n");
+	//	break;
+	//}
+	//case 退出游戏:
+	//{
+	//	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "Bye! \n");
+	//	break;
+	//}
+	//default:
+	//	GotoxyAndPrint(MAP_X / 2 - 25, MAP_Y / 2 + 3, "输入错误\n");
+	//	break;
+	//}
+	//return input;
 }
-int SelectWhenMap()
+void DrawWhoMap(const char** menu, int size, int index)
 {
-	//提示信息
 	system("cls");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "地图选择");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 新建地图");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 已有地图");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2,"请输入选择-> ");
-
-	SetCursorState(true);//显示光标
-	int input = _getch() - '0';
-	//int input = 1;
-	SetCursorState(false);//隐藏光标
-
-	return input;
+	//提示信息
+	for (int i = 0; i < size; i++)//菜单条数
+	{
+		if (i == index)
+		{
+			setColor(12, 0);
+			GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + 2 * i, menu[i]);
+			setColor(7, 0);
+		}
+		else
+			GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + 2 * i, menu[i]);
+	}
 }
-void SelectLevel()
+int SelectWhoMap(int size, int* pindex)
 {
-	//打印提示信息
+	////提示信息
+	//system("cls");				//换页则清屏
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "请选择地图：");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 系统默认");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 玩家提供");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2,"请输入选择-> ");
+
+	//SetCursorState(true);			//光标可见
+	int input = _getch();			//无回显接收
+	//SetCursorState(false);			//隐藏光标
+	switch (input)
+	{
+	case _UP:
+		if (*pindex > 0)
+			* pindex -= 1;
+		break;
+	case _DOWN:
+		if (*pindex < size - 1)//最后一条位置
+			* pindex += 1;
+		break;
+	case ENTER:
+		return ENTER;
+		break;
+	default:
+		break;
+	}
+	return 0;
+
+	//SetCursorState(true);		//用户输入前显示光标
+	//int input = _getch() - '0';	//控制其0-9，而非ASCII
+	////int input = 1;
+	//SetCursorState(false);		//输入结束后隐藏光标
+
+	//return input;
+}
+void DrawWhenMap(const char** menu, int size, int index)
+{
 	system("cls");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "游戏难度：");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 简单");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 一般");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 0, "3. 困难");
-	GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 + 2, "请输入选择-> ");
+	//提示信息
+	for (int i = 0; i < size; i++)//菜单条数
+	{
+		if (i == index)
+		{
+			setColor(12, 0);
+			GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + 2 * i, menu[i]);
+			setColor(7, 0);
+		}
+		else
+			GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + 2 * i, menu[i]);
+	}
+}
+int SelectWhenMap(int size, int* pindex)
+{
+	////提示信息
+	//system("cls");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "地图选择");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 新建地图");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 已有地图");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2,"请输入选择-> ");
+
+	int input = _getch();			//无回显接收
+	switch (input)
+	{
+	case _UP:
+		if (*pindex > 0)
+			* pindex -= 1;
+		break;
+	case _DOWN:
+		if (*pindex < size - 1)//最后一条位置
+			* pindex += 1;
+		break;
+	case ENTER:
+		return ENTER;
+		break;
+	default:
+		break;
+	}
+	return 0;
+
+	//SetCursorState(true);//显示光标
+	//int input = _getch() - '0';
+	////int input = 1;
+	//SetCursorState(false);//隐藏光标
+
+	//return input;
+}
+void DrawLevel(const char** menu, int size, int index)
+{
+	system("cls");
+	//提示信息
+	for (int i = 0; i < size; i++)//菜单条数
+	{
+		if (i == index)
+		{
+			setColor(12, 0);
+			GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + 2 * i, menu[i]);
+			setColor(7, 0);
+		}
+		else
+			GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6 + 2 * i, menu[i]);
+	}
+}
+int SelectLevel(int size, int* pindex)
+{
+	////打印提示信息
+	//system("cls");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 6, "游戏难度：");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 4, "1. 简单");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 2, "2. 一般");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 - 0, "3. 困难");
+	//GotoxyAndPrint(MAP_X / 4 - 5, MAP_Y / 2 + 2, "请输入选择-> ");
 	
-	SetCursorState(true);		//显示光标
-	int input = _getch() - '0';	//避免ASCII
-	SetCursorState(false);		//隐藏光标
 
-	//难度与障碍物数量成正比、与睡眠时间成反比
+	int input = _getch();			//无回显接收
 	switch (input)
 	{
-	case 简单:
-		g_levelEneTank = 300;
-		g_levelEneBul = 90;
+	case _UP:
+		if (*pindex > 0)
+			* pindex -= 1;
 		break;
-	case 一般:
-		g_levelEneTank = 200;
-		g_levelEneBul = 70;
+	case _DOWN:
+		if (*pindex < size - 1)//最后一条位置
+			* pindex += 1;
 		break;
-	case 困难:
-		g_levelEneTank = 100;
-		g_levelEneBul = 50;
+	case ENTER:
+		return ENTER;
 		break;
 	default:
 		break;
 	}
+	return 0;
+
+
+
+	//SetCursorState(true);		//显示光标
+	//int input = _getch() - '0';	//避免ASCII
+	//SetCursorState(false);		//隐藏光标
+
+	////难度与障碍物数量成正比、与睡眠时间成反比
+	//switch (input)
+	//{
+	//case 简单:
+	//	g_levelEneTank = 300;
+	//	g_levelEneBul = 90;
+	//	break;
+	//case 一般:
+	//	g_levelEneTank = 200;
+	//	g_levelEneBul = 70;
+	//	break;
+	//case 困难:
+	//	g_levelEneTank = 100;
+	//	g_levelEneBul = 50;
+	//	break;
+	//default:
+	//	break;
+	//}
 }
 
 //坦克相关

@@ -37,44 +37,146 @@ int main()
 
 	//初始化及欢迎界面
 	GameInit();
-	DrawWelcome();
+	//DrawWelcome();
 
-	//整体流程
-	int action = SelectAction();
-	if (action == 开始游戏)
+	//流程控制
+	int index = 0;//菜单索引
+	int flag = 0; //选择结束，进入游戏
+	while (true)
 	{
-		//选谁的地图
-		int whoMap = SelectWhoMap();
-		if (whoMap == 系统默认)
+		DrawWelcome(menuAction, _countof(menuAction), index);
+		int action = SelectAction(_countof(menuAction), &index);
+		if (action == ENTER)
 		{
-			SelectLevel();
-			BarrierInit();//使用默认的
-		}
-		else if (whoMap == 自定义)
-		{
-			//选何时的地图
-			int whenMap = SelectWhenMap();
-			if (whenMap == 新建地图)
+			switch (index)
 			{
-				SetBarrier(&tank,enemyTank);//手动设置并直接使用
-			}
-			else if (whenMap == 已有地图)
+			case 开始游戏:
 			{
-				char* _map = ShowMaps();
-				LoadMap(_map);//导入已有地图
-			}
-		}
-	}
-	else if (action == 读取游戏)
-	{
-		char* _game= ShowGames();
-		LoadGame(&tank,enemyTank,_game);
-	}
-	else if (action == 退出游戏)
-	{
-		return 0;
-	}
+				int index2 = 0;//菜单索引
+				int flag2 = 0; //选择的循环结束
+				while (true)
+				{
+					DrawWhoMap(menuWhoMap, _countof(menuWhoMap), index2);
+					int whoMap = SelectWhoMap(_countof(menuWhoMap), &index2);
+					if (whoMap == ENTER)
+					{
+						switch (index2)
+						{
+						case 系统默认:
+						{
+							int index4 = 0;
+							int flag4 = 0;
+							while (true)
+							{
+								DrawLevel(menuLevel, _countof(menuLevel), index4);
+								int level = SelectLevel(_countof(menuLevel), &index4);
+								if (level == ENTER)
+								{
+									switch (index4)
+									{
+									case 简单:
+										g_levelEneTank = 300;
+										g_levelEneBul = 90;
+										flag4 = 1;
+										break;
+									case 一般:
+										g_levelEneTank = 200;
+										g_levelEneBul = 70;
+										flag4 = 1;
+										break;
+									case 困难:
+										g_levelEneTank = 100;
+										g_levelEneBul = 50;
+										flag4 = 1;
+										break;
+									default:
+										break;
+									}
+								}
+								if (flag4 == 1)
+									break;
+							}
 
+							BarrierInit();//使用默认的
+							flag = 1;
+							flag2 = 1;
+							g_isRunning = 1;//游戏运行
+							break;
+						}
+						case 玩家提供:
+						{
+							int index3 = 0;//菜单索引
+							int flag3 = 0; //选择的循环结束
+							while(true)
+							{
+								DrawWhenMap(menuWhenMap, _countof(menuWhenMap), index3);
+								int whenMap = SelectWhenMap(_countof(menuWhenMap), &index3);
+								if (whenMap == ENTER)
+								{
+									switch (index3)
+									{
+									case 新建地图:
+										flag = 1;
+										flag2 = 1;
+										flag3 = 1;
+										g_isRunning = 1;//要进入游戏了
+										SetBarrier(&tank, enemyTank);//手动设置并直接使用
+										break;
+									case 已有地图:
+									{
+										flag = 1;
+										flag2 = 1;
+										flag3 = 1;
+										g_isRunning = 1;//要进入游戏了
+										char* _map = ShowMaps();
+										LoadMap(_map);//导入已有地图
+										break;
+									}
+									case 返回上页:
+									{
+										flag3 = 1;
+										break;
+									}
+									default:
+										break;
+									}	
+								}
+								if (flag3 == 1)
+									break;
+							}
+							break;
+						}
+						case 返回上页:
+						{
+							flag2 = 1;
+							break;
+						}
+						default:
+							break;
+						}
+					}				
+					if (flag2 == 1)
+						break;
+				}
+				break;
+			}
+			case 读取游戏:
+			{
+				flag = 1;
+				char* _game = ShowGames();
+				LoadGame(&tank, enemyTank, _game);
+				break;
+			}
+			case 退出游戏:
+				return 0;
+			default:
+				break;
+			}
+		}
+		if (flag == 1)//选择结束，进入游戏
+			break;
+	}
+	
 	//边界及障碍
 	DrawMapBorder();
 	DrawGameHelp();
