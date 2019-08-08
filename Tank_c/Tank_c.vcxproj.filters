@@ -18,9 +18,6 @@
     <ClCompile Include="Tank_c.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Engine.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Data.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

@@ -2,55 +2,45 @@
 #include "Data.h"
 
 //系统功能
-void SetCursorState(bool b);//设置光标状态
-void GotoxyAndPrint(unsigned x, unsigned y,const char * str);//光标到指定位置
-void setColor(unsigned short ForeColor, unsigned short BackGroundColor);//设置颜色
-void PlayBGM();//播放BGM/音效
+void SetCursorState(bool b);								//设置光标状态
+void setColor(int ForeColor, int BackGroundColor);			//设置颜色
+void GotoxyAndPrint(unsigned x, unsigned y, const char* str);//光标到指定位置
 
 //游戏相关
-void GameInit();//初始化工作
-void GameOver(PTANK penemytank);//善后工作
+void GameInit();				        //初始化工作
+char* ShowGameFile();					//显示存档
+void GameOver(PTANK penemytank);		//善后工作
+int SelectMenu(int size, int* pindex);  //选择菜单项
+void SaveGame(PTANK ptank, PTANK penemytank);				//存档
+void LoadGame(PTANK ptank, PTANK penemytank, char* str);	//读档
 
-void DrawWelcome(const char** menu, int size, int index);//欢迎界面
-void DrawMapBorder();//打印地图边界
-void DrawGameHelp();//打印帮助信息
-void DrawGameInfo(PTANK ptank, PTANK penemytank);//打印游戏信息
-
-int SelectAction(int size, int *pindex);//开始/退出游戏
-void DrawWhoMap(const char** menu, int size, int index);
-int SelectWhoMap(int size, int* pindex);//选择系统地图or自定义地图
-void DrawWhenMap(const char** menu, int size, int index);
-int SelectWhenMap(int size, int* pindex);//新绘制or老地图
-void DrawLevel(const char** menu, int size, int index);
-int SelectLevel(int size, int* pindex);//游戏难度
+//打印相关
+void DrawLogo();						//打印图标
+void DrawBorder();						//打印边界
+void DrawGameHelp();					//打印帮助
+void DrawBarr();						//打印障碍
+void DrawTank(PTANK ptank, int who);	//打印坦克
+void DrawBullet(PBULLET pbullet, PTANK ptank);				//打印子弹
+void DrawGameInfo(PTANK ptank, PTANK penemytank);			//打印游戏信息
+void DrawMenu(const char** menu, int size, int index);		//打印各种菜单
 
 //坦克相关
-void DrawTank(PTANK ptank,int who);//打印坦克
-void SetTankShape(PTANK ptank);//根据方向选择坦克形态
-void CleanTankTail(COORD oldCore, PCOORD oldBody);//清除旧坦克（画前必做
-int GetLiveEnemyAmount(PTANK penemytank);//获得存活敌军数量
-
-void ManipulateMyTank(PTANK ptank, int who, PTANK penemytank);//移动坦克
-void ManipulateEneTank(PTANK ptank, int who, PTANK pmytank, PTANK penemytank);
-bool IsMyTankMeetOther(PTANK ptank, int dir, PTANK penemytank);//是否遇到其他障碍/敌方坦克/边界
-bool IsEneTankMeetOther(PTANK ptank, int dir, PTANK pmytank, PTANK penemytank);//是否遇到其他障碍/敌方坦克/边界
+void SetTankShape(PTANK ptank);								  //设置坦克形态
+int  GetLiveEnemyAmount(PTANK penemytank);					  //存活敌军数量	
+void CleanTankTail(COORD oldCore, PCOORD oldBody);			  //清除旧坦克
+void ManipulateMyTank(PTANK ptank, int who, PTANK penemytank); //操纵我方坦克
+bool IsMyTankMeetOther(PTANK ptank, int dir, PTANK penemytank);//阻挡我方坦克
+void ManipulateEneTank(PTANK ptank, int who, PTANK pmytank, PTANK penemytank);//操纵敌方坦克
+bool IsEneTankMeetOther(PTANK ptank, int dir, PTANK pmytank, PTANK penemytank);//阻挡敌方坦克
 
 //子弹相关
-void MoveBullet(PBULLET pbullet);//移动子弹
-void CleanBullet(COORD oldBulCore);//清理旧子弹（画前必做
-void DrawBullet(PBULLET pbullet, PTANK ptank);//画子弹
-
-void IsMyBulMeetOther(PBULLET pbullet, PTANK penemytank,PTANK ptank);//检测子弹是否碰到障碍而消失
-void IsEneBulMeetOther(PBULLET pbullet, PTANK penemytank, PTANK ptank);
+void MoveBullet(PBULLET pbullet);	//移动子弹
+void CleanBullet(COORD oldBulCore);	//清理旧子弹
+void IsMyBulMeetOther(PBULLET pbullet, PTANK penemytank, PTANK ptank); //我方子弹碰撞
+void IsEneBulMeetOther(PBULLET pbullet, PTANK penemytank, PTANK ptank);//敌方子弹碰撞
 
 //障碍物相关
-void BarrierInit();//默认障碍物地图
-void SetBarrier(PTANK ptank, PTANK penemytank);//手动设置障碍
-char* ShowMaps();//显示所有地图并选择
-void LoadMap(char* str);//导入地图
-void DrawBarr();//打印障碍物
-
-//游戏存档
-void SaveGame(PTANK ptank, PTANK penemytank);//保存游戏
-char* ShowGames();//显示所有存档并选择
-void LoadGame(PTANK ptank, PTANK penemytank, char* str);//读档
+char* ShowMapFile();			//显示地图文件
+void LoadMapFile(char* str);	//导入地图文件
+void SetDefaultMap();			//系统默认地图
+void CustomizeMap(PTANK ptank, PTANK penemytank);//自定义地图

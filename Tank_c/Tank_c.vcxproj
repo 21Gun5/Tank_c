@@ -124,7 +124,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Data.cpp" />
-    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Func.cpp" />
     <ClCompile Include="Tank_c.cpp" />
   </ItemGroup>

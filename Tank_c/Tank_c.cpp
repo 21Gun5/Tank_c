@@ -6,12 +6,13 @@
 
 int main()
 {
-	//模拟多线程
+	//初始化
+	GameInit();
 	int time4Tank = 0;
 	int time4Bullet = 0;
 	int time4EnemyTank = 0;
 	int time4EnemyBullet = 0;
-	
+
 	//我方坦克
 	TANK tank = {
 		{MAP_X_WALL / 4, MAP_Y / 2},
@@ -19,152 +20,144 @@ int main()
 		{{0},UP,不存在}
 	};
 	SetTankShape(&tank);//设置形态
-
 	//敌方坦克
 	TANK enemyTank[ENEMY_TANK_AMOUNT] = {
 		{{2, 2}, {0},DOWN ,2,true,敌方坦克,{{0},UP,不存在}},
 		{{MAP_X_WALL / 4, 2}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} },
 		{{MAP_X_WALL / 2 - 2, 2}, {0},DOWN,2,true,敌方坦克,{{0},UP,不存在} },
-
 		{{2,  MAP_Y / 2}, {0},UP ,1,true,敌方坦克,{{0},UP,不存在}},
 		{{MAP_X_WALL / 2 - 2,  MAP_Y / 2}, {0},UP,1,true,敌方坦克,{{0},UP,不存在} },
-
 		{{2,  MAP_Y - 3}, {0},UP ,2,true,敌方坦克,{{0},UP,不存在}},
 		//{{MAP_X_WALL / 4, MAP_Y - 3} ,{0},UP ,2,true,敌方坦克,{{0},UP,不存在} },
 		{{MAP_X_WALL / 2 - 2,  MAP_Y - 3}, {0},UP,2,true,敌方坦克,{{0},UP,不存在} }
 	};
-	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) {SetTankShape(&enemyTank[i]);}//设置形态
-
-	//初始化及欢迎界面
-	GameInit();
-	//DrawWelcome();
+	for (int i = 0; i < ENEMY_TANK_AMOUNT; i++) { SetTankShape(&enemyTank[i]); }//设置形态
 
 	//流程控制
-	int index = 0;//菜单索引
-	int flag = 0; //选择结束，进入游戏
+	int indexForPlay = 0;		//菜单索引
+	bool IsSelectedPlay = 0;	//是否选择结束
 	while (true)
 	{
-		DrawWelcome(menuAction, _countof(menuAction), index);
-		int action = SelectAction(_countof(menuAction), &index);
-		if (action == ENTER)
+		DrawMenu(menuPlay, _countof(menuPlay), indexForPlay);
+		int play = SelectMenu(_countof(menuPlay), &indexForPlay);
+		if (play == ENTER)
 		{
-			switch (index)
+			switch (indexForPlay)
 			{
 			case 开始游戏:
 			{
-				int index2 = 0;//菜单索引
-				int flag2 = 0; //选择的循环结束
+				int indexForWhoMap = 0;//菜单索引
+				bool IsSelectedWhoMap = 0; //选择的循环结束
 				while (true)
 				{
-					DrawWhoMap(menuWhoMap, _countof(menuWhoMap), index2);
-					int whoMap = SelectWhoMap(_countof(menuWhoMap), &index2);
+					DrawMenu(menuWhoMap, _countof(menuWhoMap), indexForWhoMap);
+					int whoMap = SelectMenu(_countof(menuWhoMap), &indexForWhoMap);
 					if (whoMap == ENTER)
 					{
-						switch (index2)
+						switch (indexForWhoMap)
 						{
 						case 系统默认:
 						{
-							int index4 = 0;
-							int flag4 = 0;
+							int indexForLevel = 0;
+							bool IsSelectedLevel = 0;
 							while (true)
 							{
-								DrawLevel(menuLevel, _countof(menuLevel), index4);
-								int level = SelectLevel(_countof(menuLevel), &index4);
+								DrawMenu(menuLevel, _countof(menuLevel), indexForLevel);
+								int level = SelectMenu(_countof(menuLevel), &indexForLevel);
 								if (level == ENTER)
 								{
-									switch (index4)
+									switch (indexForLevel)
 									{
 									case 简单:
 										g_levelEneTank = 300;
 										g_levelEneBul = 90;
-										flag4 = 1;
+										IsSelectedLevel = 1;
 										break;
 									case 一般:
 										g_levelEneTank = 200;
 										g_levelEneBul = 70;
-										flag4 = 1;
+										IsSelectedLevel = 1;
 										break;
 									case 困难:
 										g_levelEneTank = 100;
 										g_levelEneBul = 50;
-										flag4 = 1;
+										IsSelectedLevel = 1;
 										break;
 									default:
 										break;
 									}
 								}
-								if (flag4 == 1)
+								if (IsSelectedLevel == 1)
 									break;
 							}
-
-							BarrierInit();//使用默认的
-							flag = 1;
-							flag2 = 1;
+							SetDefaultMap();//使用默认的
+							IsSelectedPlay = 1;
+							IsSelectedWhoMap = 1;
 							g_isRunning = 1;//游戏运行
 							break;
 						}
 						case 玩家提供:
 						{
-							int index3 = 0;//菜单索引
-							int flag3 = 0; //选择的循环结束
-							while(true)
+							int indexForWhenMap = 0;//菜单索引
+							bool IsSelectedWhenMap = 0; //选择的循环结束
+							while (true)
 							{
-								DrawWhenMap(menuWhenMap, _countof(menuWhenMap), index3);
-								int whenMap = SelectWhenMap(_countof(menuWhenMap), &index3);
+								DrawMenu(menuWhenMap, _countof(menuWhenMap), indexForWhenMap);
+								int whenMap = SelectMenu(_countof(menuWhenMap), &indexForWhenMap);
 								if (whenMap == ENTER)
 								{
-									switch (index3)
+									switch (indexForWhenMap)
 									{
 									case 新建地图:
-										flag = 1;
-										flag2 = 1;
-										flag3 = 1;
+										IsSelectedPlay = 1;
+										IsSelectedWhoMap = 1;
+										IsSelectedWhenMap = 1;
 										g_isRunning = 1;//要进入游戏了
-										SetBarrier(&tank, enemyTank);//手动设置并直接使用
+										CustomizeMap(&tank, enemyTank);//手动设置并直接使用
 										break;
 									case 已有地图:
 									{
-										flag = 1;
-										flag2 = 1;
-										flag3 = 1;
+										IsSelectedPlay = 1;
+										IsSelectedWhoMap = 1;
+										IsSelectedWhenMap = 1;
 										g_isRunning = 1;//要进入游戏了
-										char* _map = ShowMaps();
-										LoadMap(_map);//导入已有地图
+										char* mapFile = ShowMapFile();
+										LoadMapFile(mapFile);//导入已有地图
 										break;
 									}
 									case 返回上页:
 									{
-										flag3 = 1;
+										IsSelectedWhenMap = 1;
 										break;
 									}
 									default:
 										break;
-									}	
+									}
 								}
-								if (flag3 == 1)
+								if (IsSelectedWhenMap == 1)
 									break;
 							}
 							break;
 						}
 						case 返回上页:
 						{
-							flag2 = 1;
+							IsSelectedWhoMap = 1;
 							break;
 						}
 						default:
 							break;
 						}
-					}				
-					if (flag2 == 1)
+					}
+					if (IsSelectedWhoMap == 1)
 						break;
 				}
 				break;
 			}
 			case 读取游戏:
 			{
-				flag = 1;
-				char* _game = ShowGames();
-				LoadGame(&tank, enemyTank, _game);
+				IsSelectedPlay = 1;
+				char* gameFile = ShowGameFile();
+				LoadGame(&tank, enemyTank, gameFile);
 				break;
 			}
 			case 退出游戏:
@@ -173,12 +166,12 @@ int main()
 				break;
 			}
 		}
-		if (flag == 1)//选择结束，进入游戏
+		if (IsSelectedPlay)//选择结束，进入游戏
 			break;
 	}
-	
+
 	//边界及障碍
-	DrawMapBorder();
+	DrawBorder();
 	DrawGameHelp();
 	DrawBarr();
 
@@ -187,7 +180,6 @@ int main()
 	{
 		//信息实时显示
 		DrawGameInfo(&tank, enemyTank);
-
 		//我方坦克线程
 		if (clock() - time4Tank >= 100)
 		{
@@ -196,9 +188,8 @@ int main()
 			COORD oldBody[5] = { tank.body[0],tank.body[1],tank.body[2],tank.body[3],tank.body[4] };
 			ManipulateMyTank(&tank, 我方坦克, enemyTank);
 			CleanTankTail(oldCore, oldBody);
-			DrawTank(&tank,我方坦克);
+			DrawTank(&tank, 我方坦克);
 		}
-
 		//我方子弹线程
 		if (clock() - time4Bullet >= 50)
 		{
@@ -216,12 +207,10 @@ int main()
 				COORD oldBulCore = tank.bullet.core;
 				MoveBullet(&tank.bullet);
 				CleanBullet(oldBulCore);
-				DrawBullet(&tank.bullet,&tank);
-				IsMyBulMeetOther(&tank.bullet, enemyTank,&tank);
-				//IsBulMeetOther(&tank.bullet, enemyTank,&tank);
+				DrawBullet(&tank.bullet, &tank);
+				IsMyBulMeetOther(&tank.bullet, enemyTank, &tank);
 			}
 		}
-
 		//敌方坦克线程
 		if (clock() - time4EnemyTank >= g_levelEneTank)
 		{
@@ -230,12 +219,11 @@ int main()
 				time4EnemyTank = clock();
 				COORD oldCore = enemyTank[i].core;
 				COORD oldBody[5] = { enemyTank[i].body[0],enemyTank[i].body[1],enemyTank[i].body[2],enemyTank[i].body[3],enemyTank[i].body[4] };
-				ManipulateEneTank(&enemyTank[i], 敌方坦克,&tank,enemyTank);
+				ManipulateEneTank(&enemyTank[i], 敌方坦克, &tank, enemyTank);
 				CleanTankTail(oldCore, oldBody);
 				DrawTank(&enemyTank[i], 敌方坦克);
 			}
 		}
-
 		//敌方子弹线程
 		if (clock() - time4EnemyBullet >= g_levelEneBul)
 		{
@@ -255,11 +243,10 @@ int main()
 					MoveBullet(&enemyTank[i].bullet);
 					CleanBullet(oldBulCore);
 					DrawBullet(&enemyTank[i].bullet, &enemyTank[i]);
-					IsEneBulMeetOther(&enemyTank[i].bullet, enemyTank,&tank);
+					IsEneBulMeetOther(&enemyTank[i].bullet, enemyTank, &tank);
 				}
 			}
 		}
-
 		//判断游戏结束
 		if (tank.blood == 0 || GetLiveEnemyAmount(enemyTank) == 0)
 		{
@@ -268,8 +255,9 @@ int main()
 		}
 	}
 
-	// 消耗多余字符
+	//消耗多余字符
 	char ch = _getch();
 	ch = _getch();
+
 	return 0;
 }
