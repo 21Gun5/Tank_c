@@ -192,8 +192,8 @@ void SaveGame(PTANK ptank, PTANK penemytank)
 	{
 		//写入敌方坦克
 		fwrite(&penemytank[i].core, sizeof(COORD), 1, pFile);//中心节点
-		for (int i = 0; i < 5; i++)
-			fwrite(&penemytank[i].body[i], sizeof(COORD), 1, pFile);//其他节点
+		for (int j = 0; j < 5; j++)
+			fwrite(&penemytank[i].body[j], sizeof(COORD), 1, pFile);//其他节点
 		fwrite(&penemytank[i].dir, sizeof(int), 1, pFile);//方向
 		fwrite(&penemytank[i].blood, sizeof(int), 1, pFile);//血量
 		fwrite(&penemytank[i].isAlive, sizeof(bool), 1, pFile);//是否存活
@@ -240,8 +240,8 @@ void LoadGame(PTANK ptank, PTANK penemytank, char* str)
 	{
 		//读取敌方坦克
 		fread(&penemytank[i].core, sizeof(COORD), 1, pFile);//中心节点
-		for (int i = 0; i < 5; i++)
-			fread(&penemytank[i].body[i], sizeof(COORD), 1, pFile);//其他节点
+		for (int j = 0; j < 5; j++)
+			fread(&penemytank[i].body[j], sizeof(COORD), 1, pFile);//其他节点
 		fread(&penemytank[i].dir, sizeof(int), 1, pFile);//方向
 		fread(&penemytank[i].blood, sizeof(int), 1, pFile);//血量
 		fread(&penemytank[i].isAlive, sizeof(bool), 1, pFile);//是否存活
